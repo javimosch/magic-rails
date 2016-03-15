@@ -42,13 +42,13 @@ class BaseController < ActionController::Base
 
   def authenticate_user_from_token!
     if !claims.nil?
-      if user = user.find_by(email: claims[0]['user']) and user.valid_password?(claims[0]['password'])
+      if user = User.find_by(email: claims[0]['user']) and user.valid_password?(claims[0]['password'])
         @current_user = user
       else
         return render_unauthorized
       end
-    elsif user = user.find_by(auth_token: token_from_request)
-      @current_user =  user
+    elsif user = User.find_by(auth_token: token_from_request)
+      @current_user = user
     else
       return render_unauthorized
     end

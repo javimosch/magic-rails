@@ -4,7 +4,7 @@ class SessionsController < BaseController
   
   def create
 
-    @user = user.find_for_database_authentication(email: user_params[:email])
+    @user = User.find_for_database_authentication(email: user_params[:email])
     return invalid_login_attempt unless @user
     return invalid_login_attempt unless @user.valid_password?(user_params[:password])
     @auth_token = jwt_token(@user, user_params[:password])
