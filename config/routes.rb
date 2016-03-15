@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   
+  resources :addresses
   resources :delivery_requests
   resources :ratings
   resources :wallets
