@@ -1,17 +1,17 @@
 Rails.application.routes.draw do
   
-  resources :schedules
-  resources :availabilities
-  resources :availabilities
-  resources :delivery_contents
-  resources :delivery_contents
-  resources :deliveries
-  resources :addresses
-  resources :delivery_requests
-  resources :ratings
-  resources :wallets
+  resources :schedules, :defaults => { :format => :json }
+  resources :availabilities, :defaults => { :format => :json }
+  resources :availabilities, :defaults => { :format => :json }
+  resources :delivery_contents, :defaults => { :format => :json }
+  resources :delivery_contents, :defaults => { :format => :json }
+  resources :deliveries, :defaults => { :format => :json }
+  resources :addresses, :defaults => { :format => :json }
+  resources :delivery_requests, :defaults => { :format => :json }
+  resources :ratings, :defaults => { :format => :json }
+  resources :wallets, :defaults => { :format => :json }
   resources :notifications, :defaults => { :format => :json }
-  devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}, :defaults => { :format => :json }
+  devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

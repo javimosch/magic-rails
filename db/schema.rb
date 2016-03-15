@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160315125521) do
+ActiveRecord::Schema.define(version: 20160315135707) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,15 @@ ActiveRecord::Schema.define(version: 20160315125521) do
     t.string   "additional_address"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+  end
+
+  create_table "availabilities", force: :cascade do |t|
+    t.integer  "schedule_id"
+    t.integer  "shop_id"
+    t.integer  "deliveryman_id"
+    t.boolean  "enabled"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
   end
 
   create_table "deliveries", force: :cascade do |t|
@@ -75,13 +84,20 @@ ActiveRecord::Schema.define(version: 20160315125521) do
     t.datetime "updated_at",   null: false
   end
 
+  create_table "schedules", force: :cascade do |t|
+    t.string   "schedule"
+    t.datetime "date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "users", force: :cascade do |t|
-    t.string   "email",                  default: "", null: false
-    t.string   "encrypted_password",     default: "", null: false
+    t.string   "email",                  default: "",      null: false
+    t.string   "encrypted_password",     default: "",      null: false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          default: 0,  null: false
+    t.integer  "sign_in_count",          default: 0,       null: false
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.inet     "current_sign_in_ip"
@@ -91,8 +107,10 @@ ActiveRecord::Schema.define(version: 20160315125521) do
     t.string   "phone"
     t.string   "share_phone"
     t.string   "avatar"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
+    t.datetime "created_at",                               null: false
+    t.datetime "updated_at",                               null: false
+    t.string   "auth_method",            default: "email"
+    t.string   "auth_token"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
