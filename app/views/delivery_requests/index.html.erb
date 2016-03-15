@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Delivery Requests</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Buyer</th>
+      <th>Schedule</th>
+      <th>Shop</th>
+      <th>Address</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @delivery_requests.each do |delivery_request| %>
+      <tr>
+        <td><%= delivery_request.buyer_id %></td>
+        <td><%= delivery_request.schedule_id %></td>
+        <td><%= delivery_request.shop_id %></td>
+        <td><%= delivery_request.address_id %></td>
+        <td><%= link_to 'Show', delivery_request %></td>
+        <td><%= link_to 'Edit', edit_delivery_request_path(delivery_request) %></td>
+        <td><%= link_to 'Destroy', delivery_request, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Delivery request', new_delivery_request_path %>

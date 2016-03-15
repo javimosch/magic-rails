@@ -7,5 +7,6 @@ class User < ActiveRecord::Base
 	has_many :notifications
 	has_one :wallet
 	has_many :ratings
+	has_many :delivery_requests
 
 end

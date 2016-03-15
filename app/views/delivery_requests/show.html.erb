@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Buyer:</strong>
+  <%= @delivery_request.buyer_id %>
+</p>
+
+<p>
+  <strong>Schedule:</strong>
+  <%= @delivery_request.schedule_id %>
+</p>
+
+<p>
+  <strong>Shop:</strong>
+  <%= @delivery_request.shop_id %>
+</p>
+
+<p>
+  <strong>Address:</strong>
+  <%= @delivery_request.address_id %>
+</p>
+
+<%= link_to 'Edit', edit_delivery_request_path(@delivery_request) %> |
+<%= link_to 'Back', delivery_requests_path %>
