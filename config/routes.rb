@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   
+  resources :delivery_requests
+  resources :ratings
   resources :wallets
   resources :notifications, :defaults => { :format => :json }
   devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}, :defaults => { :format => :json }
