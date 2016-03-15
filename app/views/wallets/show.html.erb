@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>User:</strong>
+  <%= @wallet.user_id %>
+</p>
+
+<p>
+  <strong>Lemonway:</strong>
+  <%= @wallet.lemonway_id %>
+</p>
+
+<p>
+  <strong>Credit card display:</strong>
+  <%= @wallet.credit_card_display %>
+</p>
+
+<%= link_to 'Edit', edit_wallet_path(@wallet) %> |
+<%= link_to 'Back', wallets_path %>
