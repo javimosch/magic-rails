@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  schedule_id: 1
+  shop_id: 1
+  deliveryman_id: 1
+  enabled: false
+
+two:
+  schedule_id: 1
+  shop_id: 1
+  deliveryman_id: 1
+  enabled: false

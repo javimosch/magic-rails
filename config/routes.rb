@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   
+  resources :availabilities
+  resources :availabilities
   resources :delivery_contents
   resources :delivery_contents
   resources :deliveries

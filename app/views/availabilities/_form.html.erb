@@ -1,0 +1,33 @@
+<%= form_for(@availability) do |f| %>
+  <% if @availability.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@availability.errors.count, "error") %> prohibited this availability from being saved:</h2>
+
+      <ul>
+      <% @availability.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :schedule_id %><br>
+    <%= f.number_field :schedule_id %>
+  </div>
+  <div class="field">
+    <%= f.label :shop_id %><br>
+    <%= f.number_field :shop_id %>
+  </div>
+  <div class="field">
+    <%= f.label :deliveryman_id %><br>
+    <%= f.number_field :deliveryman_id %>
+  </div>
+  <div class="field">
+    <%= f.label :enabled %><br>
+    <%= f.check_box :enabled %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
