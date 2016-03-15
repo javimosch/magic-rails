@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   
+  resources :schedules
   resources :availabilities
   resources :availabilities
   resources :delivery_contents
