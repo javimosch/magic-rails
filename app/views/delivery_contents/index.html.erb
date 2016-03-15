@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Delivery Contents</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Id delivery</th>
+      <th>Id product</th>
+      <th>Quantity</th>
+      <th>Unit price</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @delivery_contents.each do |delivery_content| %>
+      <tr>
+        <td><%= delivery_content.id_delivery %></td>
+        <td><%= delivery_content.id_product %></td>
+        <td><%= delivery_content.quantity %></td>
+        <td><%= delivery_content.unit_price %></td>
+        <td><%= link_to 'Show', delivery_content %></td>
+        <td><%= link_to 'Edit', edit_delivery_content_path(delivery_content) %></td>
+        <td><%= link_to 'Destroy', delivery_content, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Delivery content', new_delivery_content_path %>

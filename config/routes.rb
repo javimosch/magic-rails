@@ -1,5 +1,8 @@
 Rails.application.routes.draw do
   
+  resources :delivery_contents
+  resources :delivery_contents
+  resources :deliveries
   resources :addresses
   resources :delivery_requests
   resources :ratings

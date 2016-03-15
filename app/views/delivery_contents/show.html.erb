@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Id delivery:</strong>
+  <%= @delivery_content.id_delivery %>
+</p>
+
+<p>
+  <strong>Id product:</strong>
+  <%= @delivery_content.id_product %>
+</p>
+
+<p>
+  <strong>Quantity:</strong>
+  <%= @delivery_content.quantity %>
+</p>
+
+<p>
+  <strong>Unit price:</strong>
+  <%= @delivery_content.unit_price %>
+</p>
+
+<%= link_to 'Edit', edit_delivery_content_path(@delivery_content) %> |
+<%= link_to 'Back', delivery_contents_path %>

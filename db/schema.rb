@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160315111337) do
+ActiveRecord::Schema.define(version: 20160315125521) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,27 @@ ActiveRecord::Schema.define(version: 20160315111337) do
     t.string   "additional_address"
     t.datetime "created_at",         null: false
     t.datetime "updated_at",         null: false
+  end
+
+  create_table "deliveries", force: :cascade do |t|
+    t.string   "status"
+    t.string   "validation_code"
+    t.integer  "total"
+    t.integer  "commission"
+    t.integer  "payin_id"
+    t.integer  "availability_id"
+    t.integer  "delivery_request_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  create_table "delivery_contents", force: :cascade do |t|
+    t.integer  "id_delivery"
+    t.integer  "id_product"
+    t.integer  "quantity"
+    t.float    "unit_price"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
   create_table "delivery_requests", force: :cascade do |t|

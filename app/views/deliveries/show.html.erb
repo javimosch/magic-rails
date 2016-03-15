@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Status:</strong>
+  <%= @delivery.status %>
+</p>
+
+<p>
+  <strong>Validation code:</strong>
+  <%= @delivery.validation_code %>
+</p>
+
+<p>
+  <strong>Total:</strong>
+  <%= @delivery.total %>
+</p>
+
+<p>
+  <strong>Commission:</strong>
+  <%= @delivery.commission %>
+</p>
+
+<p>
+  <strong>Payin:</strong>
+  <%= @delivery.payin_id %>
+</p>
+
+<p>
+  <strong>Availability:</strong>
+  <%= @delivery.availability_id %>
+</p>
+
+<p>
+  <strong>Delivery request:</strong>
+  <%= @delivery.delivery_request_id %>
+</p>
+
+<%= link_to 'Edit', edit_delivery_path(@delivery) %> |
+<%= link_to 'Back', deliveries_path %>

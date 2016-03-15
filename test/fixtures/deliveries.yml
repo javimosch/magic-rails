@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  status: MyString
+  validation_code: MyString
+  total: 1
+  commission: 1
+  payin_id: 1
+  availability_id: 1
+  delivery_request_id: 1
+
+two:
+  status: MyString
+  validation_code: MyString
+  total: 1
+  commission: 1
+  payin_id: 1
+  availability_id: 1
+  delivery_request_id: 1
