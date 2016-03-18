@@ -1,6 +1,7 @@
 class Availability < ActiveRecord::Base
 
 	belongs_to :deliveryman, class_name: 'User'
-	has_many :schedule
+	belongs_to :deliveries
+	has_one :schedule, foreign_key: 'id', primary_key: 'id'
 
 end

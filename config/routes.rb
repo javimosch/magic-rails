@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   resources :ratings, :defaults => { :format => :json }
   resources :wallets, :defaults => { :format => :json }
   resources :notifications, :defaults => { :format => :json }
+  resources :shops, :defaults => { :format => :json }
   devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}
 
   # The priority is based upon order of creation: first created -> highest priority.

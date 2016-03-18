@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160315135707) do
+ActiveRecord::Schema.define(version: 20160317141418) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20160315135707) do
     t.boolean  "enabled"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
+    t.integer  "delivery_id"
   end
 
   create_table "deliveries", force: :cascade do |t|
@@ -65,7 +66,7 @@ ActiveRecord::Schema.define(version: 20160315135707) do
   end
 
   create_table "notifications", force: :cascade do |t|
-    t.string   "type"
+    t.string   "mode"
     t.string   "title"
     t.text     "content"
     t.string   "sender"

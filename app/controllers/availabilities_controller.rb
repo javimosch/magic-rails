@@ -13,7 +13,7 @@ class AvailabilitiesController < ApplicationController
   end
 
   # GET /availabilities/new
-  def new
+  def newcontacts
     @availability = Availability.new
   end
 
@@ -24,11 +24,25 @@ class AvailabilitiesController < ApplicationController
   # POST /availabilities
   # POST /availabilities.json
   def create
-    @availability = Availability.new(availability_params)
+
+    schedules = params[:schedules]
+
+    schedules.each do |schedule|
+      schedule[1].each do |hours|
+        date = Date.parse(schedule[0]).beginning_of_day()
+        @schedule = Schedule.find_or_create_by(date: date, schedule: hours) do |this|
+          this.date = date
+          this.schedule = hours
+        end
+        if @schedule.save
+          @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
+        end
+      end
+    end
 
     respond_to do |format|
-      if @availability.save
-        format.html { redirect_to @availability, notice: 'Availability was successfully created.' }
+      if @availability.save || @schedule.save
+        format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
         format.json { render :show, status: :created, location: @availability }
       else
         format.html { render :new }
@@ -69,6 +83,7 @@ class AvailabilitiesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def availability_params
-      params.require(:availability).permit(:schedule_id, :shop_id, :deliveryman_id, :enabled)
+      ap params
+      params.require(:availability).permit(:shop_id, :deliveryman_id, :enabled, :schedules)
     end
 end
