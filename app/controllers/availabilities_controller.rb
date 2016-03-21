@@ -33,20 +33,21 @@ class AvailabilitiesController < ApplicationController
         @schedule = Schedule.find_or_create_by(date: date, schedule: hours) do |this|
           this.date = date
           this.schedule = hours
+          this.was_created = true
         end
-        if @schedule.save
+        if @schedule.was_created
           @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
         end
       end
     end
 
     respond_to do |format|
-      if @availability.save || @schedule.save
+      if @schedule.was_created
         format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
         format.json { render :show, status: :created, location: @availability }
       else
         format.html { render :new }
-        format.json { render json: @availability.errors, status: :unprocessable_entity }
+        format.json { render json: {notice: 'Les créneaux chosis sont déjà pris par une autre commande'} }
       end
     end
   end
