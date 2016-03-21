@@ -10,9 +10,6 @@ class Rating < ActiveRecord::Base
 	def calculate_average
 		@user = User.find_by(id: to_user_id)
 		rating_average = Rating.where(to_user_id: to_user_id).average(:rating)
-		ap 'Calculate average'
-		ap @user
-		ap rating_average
 		@user.update(rating_average: rating_average)
 	end
 
