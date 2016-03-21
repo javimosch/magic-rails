@@ -36,6 +36,7 @@ class DeviseCreateUsers < ActiveRecord::Migration
       t.string :phone
       t.string :share_phone
       t.string :avatar
+      t.float  :rating_average, default: 0
 
       t.timestamps null: false
     end

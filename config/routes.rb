@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   
+  resources :scores
   resources :schedules, :defaults => { :format => :json }
   resources :availabilities, :defaults => { :format => :json }
   resources :availabilities, :defaults => { :format => :json }

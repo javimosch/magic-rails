@@ -80,6 +80,7 @@ ActiveRecord::Schema.define(version: 20160317141418) do
   create_table "ratings", force: :cascade do |t|
     t.integer  "to_user_id"
     t.integer  "from_user_id"
+    t.integer  "rating"
     t.string   "type"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
@@ -108,6 +109,7 @@ ActiveRecord::Schema.define(version: 20160317141418) do
     t.string   "phone"
     t.string   "share_phone"
     t.string   "avatar"
+    t.float    "rating_average",         default: 0.0
     t.datetime "created_at",                               null: false
     t.datetime "updated_at",                               null: false
     t.string   "auth_method",            default: "email"
