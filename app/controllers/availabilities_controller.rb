@@ -25,6 +25,13 @@ class AvailabilitiesController < ApplicationController
   # POST /availabilities.json
   def create
 
+    if (Availability.where("deliveryman_id == ? AND shop_id != ?", params[:deliveryman_id], params[:shop_id]).count > 0)
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'} }
+      end
+    end
+
     schedules = params[:schedules]
 
     schedules.each do |schedule|
