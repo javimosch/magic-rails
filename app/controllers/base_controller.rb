@@ -47,8 +47,8 @@ class BaseController < ActionController::Base
       else
         return render_unauthorized
       end
-    elsif user = User.find_by(auth_token: token_from_request)
-      @current_user = user
+    # elsif user = User.find_by(auth_token: token_from_request)
+    #   @current_user = user
     else
       return render_unauthorized
     end
