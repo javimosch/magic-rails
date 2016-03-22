@@ -24,7 +24,13 @@ class DeliveriesController < ApplicationController
   # POST /deliveries
   # POST /deliveries.json
   def create
-    @delivery = Delivery.new(delivery_params)
+
+    @delivery = Delivery.create!(delivery_params)
+
+    delivery_contents = params[:delivery_contents]
+    delivery_contents.each do |delivery_content|
+      DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content.id_product, quantity: delivery_content.quantity, unit_price: delivery_content.unit_price
+    end
 
     respond_to do |format|
       if @delivery.save
@@ -69,6 +75,6 @@ class DeliveriesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def delivery_params
-      params.require(:delivery).permit(:status, :validation_code, :total, :commission, :payin_id, :availability_id, :delivery_request_id)
+      params.require(:delivery).permit(:status, :total, :commission, :payin_id, :availability_id, :delivery_request_id, :delivery_contents)
     end
 end

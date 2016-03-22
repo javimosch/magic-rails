@@ -24,17 +24,43 @@ class DeliveryRequestsController < ApplicationController
   # POST /delivery_requests
   # POST /delivery_requests.json
   def create
-    @delivery_request = DeliveryRequest.new(delivery_request_params)
+
+    if params[:schedule].present?
+
+      date = Date.parse(params[:schedule][0]).beginning_of_day()
+      @schedule = Schedule.find_by(date: date, schedule: params[:schedule][1])
+
+      if (@schedule.count > 0)
+
+        @address = Address.new(params[:address_attributes])
+        if @address.save
+
+          @delivery_request = DeliveryRequest.create! buyer_id: params[:buyer_id], schedule: @schedule.id, shop_id: params[:shop_id], address_id: @address.id
+          if @delivery_request.save
+            respond_to do |format|
+              format.html { redirect_to @delivery_request, notice: 'Delivery request was successfully created.' }
+              format.json { render :show, status: :created, location: @delivery_request }
+            end
+          end
+
+        end
+
+      else
+
+        respond_to do |format|
+          format.html { redirect_to @delivery_request, notice: 'Aucun livreur n\'est disponible pour ce créneau de livraison.' }
+          format.json { render json: {notice: 'Aucun livreur n\'est disponible pour ce créneau de livraison.' } }
+        end
+
+      end
+
+    end
 
     respond_to do |format|
-      if @delivery_request.save
-        format.html { redirect_to @delivery_request, notice: 'Delivery request was successfully created.' }
-        format.json { render :show, status: :created, location: @delivery_request }
-      else
-        format.html { render :new }
-        format.json { render json: @delivery_request.errors, status: :unprocessable_entity }
-      end
+      format.html { render :new }
+      format.json { render json: {notice: 'Veuillez rensigner un créneau valide.'}, status: :unprocessable_entity }
     end
+
   end
 
   # PATCH/PUT /delivery_requests/1
@@ -69,6 +95,6 @@ class DeliveryRequestsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def delivery_request_params
-      params.require(:delivery_request).permit(:buyer_id, :schedule_id, :shop_id, :address_id)
+      params.require(:delivery_request).permit(:buyer_id, :schedule, :shop_id)
     end
 end
