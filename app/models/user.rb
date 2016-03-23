@@ -9,4 +9,8 @@ class User < ActiveRecord::Base
 	has_many :ratings
 	has_many :delivery_requests
 
+	def name
+		firstname + ' ' + lastname
+	end
+
 end

@@ -4,15 +4,9 @@ class Delivery < ActiveRecord::Base
 	has_many :delivery_contents
 	has_one :availability
 
-	after_create :send_notification
 	after_create :generate_validation_code
 
-
 	private
-
-	def send_notification
-		ap 'coucou'
-	end
 
 	def generate_validation_code(size = 6)
 		charset = %w{ 2 3 4 6 7 9 A C D E F G H J K M N P Q R T V W X Y Z}
