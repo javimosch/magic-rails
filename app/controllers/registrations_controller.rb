@@ -35,7 +35,7 @@ class RegistrationsController < BaseController
 	private
 
 	def user_params
-		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token)
+		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :wallet_id)
 	end
 
 end

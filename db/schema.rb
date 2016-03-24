@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160321142111) do
+ActiveRecord::Schema.define(version: 20160324165258) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,8 +21,9 @@ ActiveRecord::Schema.define(version: 20160321142111) do
     t.string   "city"
     t.string   "zip"
     t.string   "additional_address"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+    t.integer  "delivery_request_id"
   end
 
   create_table "availabilities", force: :cascade do |t|
@@ -108,11 +109,12 @@ ActiveRecord::Schema.define(version: 20160321142111) do
     t.string   "phone"
     t.string   "share_phone"
     t.string   "avatar"
-    t.float    "rating_average",         default: 0.0
+    t.float    "rating_average"
     t.datetime "created_at",                               null: false
     t.datetime "updated_at",                               null: false
     t.string   "auth_method",            default: "email"
     t.string   "auth_token"
+    t.integer  "wallet_id"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

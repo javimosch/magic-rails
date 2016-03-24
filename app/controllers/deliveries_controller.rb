@@ -1,10 +1,30 @@
-class DeliveriesController < ApplicationController
+class DeliveriesController < BaseController
   before_action :set_delivery, only: [:show, :edit, :update, :destroy]
 
   # GET /deliveries
   # GET /deliveries.json
   def index
-    @deliveries = Delivery.all
+    
+    @availabilities = Availability.where(deliveryman_id: current_user.id)
+    ids = []
+    @availabilities.each do |order|
+      ids.push(order.id)
+    end
+    @deliveries = Delivery.where(availability_id: ids)
+  
+  end
+
+  # GET /orders
+  # GET /orders.json
+  def orders
+
+    @orders = DeliveryRequest.where(buyer_id: current_user.id)
+    ids = []
+    @orders.each do |order|
+      ids.push(order.id)
+    end
+    @deliveries = Delivery.where(delivery_request_id: ids)
+    
   end
 
   # GET /deliveries/1
@@ -27,11 +47,6 @@ class DeliveriesController < ApplicationController
 
     @delivery = Delivery.create!(delivery_params)
 
-    delivery_contents = params[:delivery_contents]
-    delivery_contents.each do |delivery_content|
-      DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content.id_product, quantity: delivery_content.quantity, unit_price: delivery_content.unit_price
-    end
-
     respond_to do |format|
       if @delivery.save
         format.html { redirect_to @delivery, notice: 'Delivery was successfully created.' }
@@ -43,9 +58,30 @@ class DeliveriesController < ApplicationController
     end
   end
 
+  # POST /check
+  # POST /check.json
+  def check
+    respond_to do |format|
+      if Delivery.exists?(id: params[:id], validation_code: params[:validation_code]) 
+        Delivery.update(params[:id], status: 'finished')
+        format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
+        format.json { render :show, status: :ok, location: @delivery }
+      else
+        format.html { render :new }
+        format.json { render json: { notice: 'Le code de validation n\'existe pas pour cette commande' }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   # PATCH/PUT /deliveries/1
   # PATCH/PUT /deliveries/1.json
   def update
+
+    delivery_contents = params[:delivery_contents]
+    delivery_contents.each do |delivery_content|
+      DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content.id_product, quantity: delivery_content.quantity, unit_price: delivery_content.unit_price
+    end
+
     respond_to do |format|
       if @delivery.update(delivery_params)
         format.html { redirect_to @delivery, notice: 'Delivery was successfully updated.' }

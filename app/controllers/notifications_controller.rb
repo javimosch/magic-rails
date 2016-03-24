@@ -1,10 +1,10 @@
-class NotificationsController < ApplicationController
+class NotificationsController < BaseController
   before_action :set_notification, only: [:show, :edit, :update, :destroy]
 
   # GET /notifications
   # GET /notifications.json
   def index
-    @notifications = Notification.all
+    @notifications = Notification.where(user_id: current_user.id, read: false)
   end
 
   # GET /notifications/1

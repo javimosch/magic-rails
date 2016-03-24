@@ -1,4 +1,4 @@
-class WalletsController < ApplicationController
+class WalletsController < BaseController
   before_action :set_wallet, only: [:show, :edit, :update, :destroy]
 
   # GET /wallets

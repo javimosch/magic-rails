@@ -1,4 +1,4 @@
-class DeliveryContentsController < ApplicationController
+class DeliveryContentsController < BaseController
   before_action :set_delivery_content, only: [:show, :edit, :update, :destroy]
 
   # GET /delivery_contents

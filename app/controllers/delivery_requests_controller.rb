@@ -1,4 +1,4 @@
-class DeliveryRequestsController < ApplicationController
+class DeliveryRequestsController < BaseController
   before_action :set_delivery_request, only: [:show, :edit, :update, :destroy]
 
   # GET /delivery_requests
@@ -27,20 +27,27 @@ class DeliveryRequestsController < ApplicationController
 
     if params[:schedule].present?
 
-      date = Date.parse(params[:schedule][0]).beginning_of_day()
-      @schedule = Schedule.find_by(date: date, schedule: params[:schedule][1])
+      params[:schedule].each do |schedule|
+        schedule[1].each do |hours|
+          @date = Date.parse(schedule[0]).beginning_of_day
+          @hours = hours
+        end
+      end
 
-      if (@schedule.count > 0)
+      if (Schedule.exists?(date: @date, schedule: @hours))
+        @schedule = Schedule.find_by(date: @date, schedule: @hours)
 
-        @address = Address.new(params[:address_attributes])
+        @address = Address.new(address: params[:address_attributes][:address], city: params[:address_attributes][:city], zip: params[:address_attributes][:zip], additional_address: params[:address_attributes][:additional_address])
         if @address.save
 
-          @delivery_request = DeliveryRequest.create! buyer_id: params[:buyer_id], schedule: @schedule.id, shop_id: params[:shop_id], address_id: @address.id
+          @delivery_request = DeliveryRequest.create! buyer_id: params[:buyer_id], schedule_id: @schedule.id, shop_id: params[:shop_id], address_id: @address.id
           if @delivery_request.save
+            Address.update(@address.id, delivery_request_id: @delivery_request.id)
             respond_to do |format|
               format.html { redirect_to @delivery_request, notice: 'Delivery request was successfully created.' }
               format.json { render :show, status: :created, location: @delivery_request }
             end
+
           end
 
         end
@@ -54,11 +61,13 @@ class DeliveryRequestsController < ApplicationController
 
       end
 
-    end
+    else
 
-    respond_to do |format|
-      format.html { render :new }
-      format.json { render json: {notice: 'Veuillez rensigner un créneau valide.'}, status: :unprocessable_entity }
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: {notice: 'Veuillez rensigner un créneau valide.'}, status: :unprocessable_entity }
+      end
+
     end
 
   end

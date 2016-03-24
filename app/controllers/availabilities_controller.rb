@@ -1,10 +1,10 @@
-class AvailabilitiesController < ApplicationController
+class AvailabilitiesController < BaseController
   before_action :set_availability, only: [:show, :edit, :update, :destroy]
 
   # GET /availabilities
   # GET /availabilities.json
   def index
-    @availabilities = Availability.all
+    @availabilities = Availability.where(deliveryman_id: current_user.id)
   end
 
   # GET /availabilities/1
@@ -13,7 +13,7 @@ class AvailabilitiesController < ApplicationController
   end
 
   # GET /availabilities/new
-  def newcontacts
+  def new
     @availability = Availability.new
   end
 
@@ -54,7 +54,7 @@ class AvailabilitiesController < ApplicationController
         format.json { render :show, status: :created, location: @availability }
       else
         format.html { render :new }
-        format.json { render json: {notice: 'Les créneaux chosis sont déjà pris par une autre commande'} }
+        format.json { render json: {notice: 'SCHEDULE_ALREADY_EXIST'}, status: 409 }
       end
     end
   end
