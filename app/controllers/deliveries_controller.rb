@@ -18,10 +18,11 @@ class DeliveriesController < BaseController
   # GET /orders.json
   def orders
 
-    @orders = DeliveryRequest.where(buyer_id: current_user.id)
+    @orders = DeliveryRequest.where(buyer_id: current_user.id, match: false)
+    @deliveries = DeliveryRequest.where(buyer_id: current_user.id, match: true)
     ids = []
-    @orders.each do |order|
-      ids.push(order.id)
+    @deliveries.each do |delivery|
+      ids.push(delivery.id)
     end
     @deliveries = Delivery.where(delivery_request_id: ids)
     
@@ -45,10 +46,11 @@ class DeliveriesController < BaseController
   # POST /deliveries.json
   def create
 
-    @delivery = Delivery.create!(delivery_params)
+    @delivery = Delivery.new(delivery_params)
 
     respond_to do |format|
       if @delivery.save
+        Delivery.update(@delivery.id, status: 'accepted')
         format.html { redirect_to @delivery, notice: 'Delivery was successfully created.' }
         format.json { render :show, status: :created, location: @delivery }
       else
@@ -58,9 +60,9 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /check
-  # POST /check.json
-  def check
+  # POST /finalize
+  # POST /finalize.json
+  def finalize
     respond_to do |format|
       if Delivery.exists?(id: params[:id], validation_code: params[:validation_code]) 
         Delivery.update(params[:id], status: 'finished')
@@ -68,7 +70,7 @@ class DeliveriesController < BaseController
         format.json { render :show, status: :ok, location: @delivery }
       else
         format.html { render :new }
-        format.json { render json: { notice: 'Le code de validation n\'existe pas pour cette commande' }, status: :unprocessable_entity }
+        format.json { render json: { notice: 'VALIDATION_CODE_ERROR' }, status: :unprocessable_entity }
       end
     end
   end
@@ -81,6 +83,8 @@ class DeliveriesController < BaseController
     delivery_contents.each do |delivery_content|
       DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content.id_product, quantity: delivery_content.quantity, unit_price: delivery_content.unit_price
     end
+
+    Delivery.update(@delivery.id, status: 'completed')
 
     respond_to do |format|
       if @delivery.update(delivery_params)
@@ -111,6 +115,6 @@ class DeliveriesController < BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def delivery_params
-      params.require(:delivery).permit(:status, :total, :commission, :payin_id, :availability_id, :delivery_request_id, :delivery_contents)
+      params.require(:delivery).permit(:status, :total, :payin_id, :availability_id, :delivery_request_id, :delivery_contents)
     end
 end

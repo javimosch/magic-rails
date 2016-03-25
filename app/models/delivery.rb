@@ -4,12 +4,14 @@ class Delivery < ActiveRecord::Base
 	belongs_to :delivery_request
 
 	has_many :delivery_contents
-	has_one :availability
-	has_one :delivery_request
+	has_one :availability, foreign_key: 'id', primary_key: 'availability_id'
+	has_one :delivery_request, foreign_key: 'id', primary_key: 'delivery_request_id'
 
 	after_create :generate_validation_code
 	after_create :send_accepted_delivery
 
+	after_save :calculate_commission
+	after_save :calculate_shipping_total
 
 	private
 
@@ -25,11 +27,12 @@ class Delivery < ActiveRecord::Base
 		@delivery_request = self.delivery_request
 
 		meta = {}
+		meta[:delivery] = self
 		meta[:availability] = @availability
 		meta[:delivery_request] = @delivery_request
 		meta[:deliveryman] = @availability.deliveryman
-		meta[:address] = Address.find(@delivery_request.address_id)
-		meta[:schedule] = Schedule.find(@availability.schedule_id)
+		meta[:address] = @delivery_request.address
+		meta[:schedule] = @delivery_request.schedule
 		meta[:shop] = nil
 		response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{@availability.shop_id}", query: {
 			mct: ENV['MASTERCOURSE_KEY']
@@ -38,8 +41,20 @@ class Delivery < ActiveRecord::Base
 			meta[:shop] = response
 		end
 
-		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'push', user_id: @availability.deliveryman_id, meta: meta.to_json, read: false
-	
+		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'push', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
+
+	end
+
+	def calculate_commission
+		if !total.nil?
+			self.update_attributes(commission: self.total * (ENV['COMMISSION_PERCENTAGE'] / 100))
+		end
+	end
+
+	def calculate_shipping_total
+		if !total.nil?
+			self.update_attributes(shipping_total: self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'] / 100))
+		end
 	end
 
 end

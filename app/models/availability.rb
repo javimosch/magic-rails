@@ -29,6 +29,10 @@ class Availability < ActiveRecord::Base
 			end
 
 			Notification.create! mode: 'availability', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: self.deliveryman_id, meta: meta.to_json, read: false
+
+			@delivery_request.update(match: true)
+			self.update(match: true)
+
 		end
 
 	end

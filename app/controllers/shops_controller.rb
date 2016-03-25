@@ -4,8 +4,6 @@ class ShopsController < BaseController
   # GET /shops.json
   def index
 
-    ap current_user.id
-
     @response = []
 
     response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
@@ -54,6 +52,44 @@ class ShopsController < BaseController
         @response = response
       end
       
+    end
+
+  end
+
+  # GET /products
+  # GET /products.json
+  def products
+
+    @response = []
+
+    store = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/", query: {
+      mct: ENV['MASTERCOURSE_KEY']
+    });
+
+    if store.code == 200
+
+      products = HTTParty.get("https://www.mastercourses.com/api2/chains/#{store['chain_id']}/products/search/", query: {
+        mct: ENV['MASTERCOURSE_KEY'],
+        q: params['q']
+      });
+
+      if products.code == 200
+
+        products.take(ENV['PRODUCT_SEARCH_LIMIT'].to_i).each do |product|
+
+          response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/#{product['id']}/", query: {
+            mct: ENV['MASTERCOURSE_KEY'],
+            q: params['q']
+          });
+
+          if response.code == 200
+            @response.push(response)
+          end
+
+        end
+
+      end
+
     end
 
   end
