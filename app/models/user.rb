@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
 	:recoverable, :rememberable, :trackable, :validatable
 
 	has_many :notifications
-	has_one :wallet
+	has_one :wallet, dependent: :destroy
 	has_many :ratings
 	has_many :delivery_requests
 
