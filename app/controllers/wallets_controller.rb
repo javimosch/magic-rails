@@ -64,7 +64,7 @@ class WalletsController < BaseController
 
     if response.code == 200
       if !response['d']['CARD'].nil?
-        @wallet.update(credit_card_display: response['d']['CARD']['EXTRA']['NUM'])
+        @wallet.update(credit_card_display: response['d']['CARD']['EXTRA']['NUM'], lemonway_card_id: response['d']['CARD']['ID'])
         respond_to do |format|
           format.html { redirect_to @wallet, notice: 'Wallet was successfully updated.' }
           format.json { render :show, status: :ok, location: @wallet }

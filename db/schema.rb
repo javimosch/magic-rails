@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160325115009) do
+ActiveRecord::Schema.define(version: 20160330125047) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,14 +40,14 @@ ActiveRecord::Schema.define(version: 20160325115009) do
   create_table "deliveries", force: :cascade do |t|
     t.string   "status",              default: "pending"
     t.string   "validation_code"
-    t.integer  "total"
-    t.integer  "commission"
+    t.float    "total"
+    t.float    "commission"
     t.integer  "payin_id"
     t.integer  "availability_id"
     t.integer  "delivery_request_id"
     t.datetime "created_at",                              null: false
     t.datetime "updated_at",                              null: false
-    t.integer  "shopping_total"
+    t.float    "shipping_total"
   end
 
   create_table "delivery_contents", force: :cascade do |t|
@@ -129,6 +129,7 @@ ActiveRecord::Schema.define(version: 20160325115009) do
     t.string   "credit_card_display"
     t.datetime "created_at",          null: false
     t.datetime "updated_at",          null: false
+    t.integer  "lemonway_card_id"
   end
 
 end

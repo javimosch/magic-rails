@@ -4,7 +4,7 @@ class Wallet < ActiveRecord::Base
 
 	after_create :register
 
-	private
+#	private
 
 	def register
 

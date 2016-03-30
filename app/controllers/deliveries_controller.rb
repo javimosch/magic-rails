@@ -60,6 +60,79 @@ class DeliveriesController < BaseController
     end
   end
 
+  # POST /payment
+  # POST /payment.json
+  def payment
+
+    if (Delivery.exists?(id: params[:id], status: 'completed'))
+
+      @delivery = Delivery.where(id: params[:id], status: 'completed').first
+      @wallet = @delivery.delivery_request.buyer.wallet
+
+      if !@wallet.lemonway_id.nil? && !@wallet.lemonway_card_id.nil?
+
+        response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
+          headers: {
+            'Content-Type' => 'application/json; charset=utf-8',
+          },
+          body: {
+            wlLogin: ENV['LEMONWAY_LOGIN'],
+            wlPass: ENV['LEMONWAY_PASS'],
+            language: 'fr',
+            version: '1.8',
+            walletIp: request.remote_ip,
+            walletUa: 'ruby/rails',
+            wallet: @wallet.id,
+            cardId: @wallet.lemonway_card_id,
+            amountTot: @delivery.total,
+            amountCom: @delivery.commission,
+            comment: @delivery.status,
+            message: @delivery.status,
+            autoCommission: '0',
+            isPreAuth: '',
+            specialConfig: '',
+            delayedDays: '',
+            wkToken: @delivery.id
+          }.to_json
+        );
+
+        if response.code == 200
+
+          if !response['d']['TRANS']['HPAY'].nil?
+            @wallet.update(payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'paid')
+            respond_to do |format|
+              format.html { redirect_to @wallet, notice: 'Delivery was successfully paid.' }
+              format.json { render :show, status: :ok, location: @delivery }
+            end
+          elsif !response['d']['E'].nil?
+            ap "LEMONWAY ERROR"
+            ap response['d']['E']
+            respond_to do |format|
+              format.html { render :edit }
+              format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+            end
+          end
+
+        else
+
+          respond_to do |format|
+            format.html { render :new }
+            format.json { render json: { notice: 'LEMONWAY_SERVER_ERROR' }, status: :unprocessable_entity }
+          end
+
+        end
+
+    else
+
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: { notice: 'DELIVERY_NOT_FOUND' }, status: :unprocessable_entity }
+      end
+
+    end
+    
+  end
+
   # POST /finalize
   # POST /finalize.json
   def finalize
@@ -115,6 +188,6 @@ class DeliveriesController < BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def delivery_params
-      params.require(:delivery).permit(:status, :total, :payin_id, :availability_id, :delivery_request_id, :delivery_contents)
+      params.require(:delivery).permit(:status, :total, :availability_id, :delivery_request_id, :delivery_contents)
     end
 end
