@@ -4,14 +4,14 @@ class DeliveriesController < BaseController
   # GET /deliveries
   # GET /deliveries.json
   def index
-    
+
     @availabilities = Availability.where(deliveryman_id: current_user.id)
     ids = []
     @availabilities.each do |order|
       ids.push(order.id)
     end
     @deliveries = Delivery.where(availability_id: ids)
-  
+
   end
 
   # GET /orders
@@ -25,7 +25,7 @@ class DeliveriesController < BaseController
       ids.push(delivery.id)
     end
     @deliveries = Delivery.where(delivery_request_id: ids)
-    
+
   end
 
   # GET /deliveries/1
@@ -121,7 +121,7 @@ class DeliveriesController < BaseController
           end
 
         end
-
+      end
     else
 
       respond_to do |format|
@@ -130,14 +130,14 @@ class DeliveriesController < BaseController
       end
 
     end
-    
+
   end
 
   # POST /finalize
   # POST /finalize.json
   def finalize
     respond_to do |format|
-      if Delivery.exists?(id: params[:id], validation_code: params[:validation_code]) 
+      if Delivery.exists?(id: params[:id], validation_code: params[:validation_code])
         Delivery.update(params[:id], status: 'finished')
         format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
         format.json { render :show, status: :ok, location: @delivery }
@@ -153,11 +153,16 @@ class DeliveriesController < BaseController
   def update
 
     delivery_contents = params[:delivery_contents]
+    total = 0
+    DeliveryContent.destroy_all(id_delivery: @delivery.id)
     delivery_contents.each do |delivery_content|
-      DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content.id_product, quantity: delivery_content.quantity, unit_price: delivery_content.unit_price
+      DeliveryContent.create! id_delivery: @delivery.id, id_product: delivery_content[:id_product], quantity: delivery_content[:quantity], unit_price: delivery_content[:unit_price]
+      total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    Delivery.update(@delivery.id, status: 'completed')
+    Delivery.update(@delivery.id, :status => 'completed', :total => total)
+
+    @delivery = Delivery.find(@delivery.id)
 
     respond_to do |format|
       if @delivery.update(delivery_params)
@@ -181,13 +186,13 @@ class DeliveriesController < BaseController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_delivery
-      @delivery = Delivery.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_delivery
+    @delivery = Delivery.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def delivery_params
-      params.require(:delivery).permit(:status, :total, :availability_id, :delivery_request_id, :delivery_contents)
-    end
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def delivery_params
+    params.require(:delivery).permit(:status, :total, :availability_id, :delivery_request_id, :delivery_contents)
+  end
 end

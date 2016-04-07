@@ -3,7 +3,7 @@ class Delivery < ActiveRecord::Base
 	belongs_to :availability
 	belongs_to :delivery_request
 
-	has_many :delivery_contents
+	has_many :delivery_contents, foreign_key: 'id_delivery'
 	has_one :availability, foreign_key: 'id', primary_key: 'availability_id'
 	has_one :delivery_request, foreign_key: 'id', primary_key: 'delivery_request_id'
 
@@ -20,9 +20,9 @@ class Delivery < ActiveRecord::Base
 		self.validation_code = (0...size).map{ charset.to_a[rand(charset.size)] }.join
 		self.save
 	end
-	
+
 	def send_accepted_delivery
-		
+
 		@availability = self.availability
 		@delivery_request = self.delivery_request
 
