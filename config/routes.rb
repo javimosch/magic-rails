@@ -16,8 +16,7 @@ Rails.application.routes.draw do
   devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}
 
   get 'orders' => 'deliveries#orders', :defaults => { :format => :json }
-  post 'payment' => 'deliveries#payment', :defaults => { :format => :json }
-  post 'finalize' => 'deliveries#finalize', :defaults => { :format => :json }
+  post '/deliveries/:id/finalize' => 'deliveries#finalize', :defaults => { :format => :json }
   get 'products' => 'shops#products', :defaults => { :format => :json }
 
   # The priority is based upon order of creation: first created -> highest priority.
