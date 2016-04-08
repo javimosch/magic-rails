@@ -65,6 +65,7 @@ class DeliveriesController < BaseController
   # POST /deliveries/1/finalize
   # POST /deliveries/1/finalize.json
   def finalize
+
     respond_to do |format|
 
       # Le livreur entre le code et note le livré
@@ -102,9 +103,10 @@ class DeliveriesController < BaseController
           if response.code == 200
 
             if !response['d']['TRANS']['HPAY'].nil?
-              @delivery.update(payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'paid')
-              format.html { redirect_to @wallet, notice: 'Delivery was successfully paid.' }
-              format.json { render :show, status: :ok, location: @delivery }
+              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i)
+              Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
+              format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
+              format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
             elsif !response['d']['E'].nil?
               ap "LEMONWAY ERROR"
               ap response['d']['E']
@@ -125,11 +127,6 @@ class DeliveriesController < BaseController
           format.json { render json: { notice: 'WALLET_ERROR' }, status: :unprocessable_entity }
 
         end
-
-        Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i)
-        Delivery.update(params[:id], status: 'done')
-        format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
-        format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
 
       # Le livré note le livreur
       elsif params[:rating].present? && current_user.id == @delivery.delivery_request.buyer_id
