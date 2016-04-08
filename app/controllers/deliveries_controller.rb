@@ -99,7 +99,7 @@ class DeliveriesController < BaseController
         if response.code == 200
 
           if !response['d']['TRANS']['HPAY'].nil?
-            @wallet.update(payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'paid')
+            @delivery.update(payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'paid')
             respond_to do |format|
               format.html { redirect_to @wallet, notice: 'Delivery was successfully paid.' }
               format.json { render :show, status: :ok, location: @delivery }
