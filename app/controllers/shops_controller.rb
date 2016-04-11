@@ -6,12 +6,20 @@ class ShopsController < BaseController
 
     @response = []
 
-    response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
-      mct: ENV['MASTERCOURSE_KEY'],
-      lat: params[:lat],
-      lon: params[:lon],
-      number: ENV['SHOPS_NUMBER']
-    });
+    if params[:address]
+      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+        mct: ENV['MASTERCOURSE_KEY'],
+        address: params[:address],
+        number: ENV['SHOPS_NUMBER']
+      });
+    else
+      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+        mct: ENV['MASTERCOURSE_KEY'],
+        lat: params[:lat],
+        lon: params[:lon],
+        number: ENV['SHOPS_NUMBER']
+      });
+    end
 
     if response.code == 200
    
