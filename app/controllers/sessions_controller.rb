@@ -8,8 +8,9 @@ class SessionsController < BaseController
     return invalid_login_attempt unless @user
     return invalid_login_attempt unless @user.valid_password?(user_params[:password])
     @auth_token = jwt_token(@user, user_params[:password])
-
-    render json: {token: @auth_token, user: @user}, status: 201
+    user = @user.as_json
+    user[:wallet] = @user.wallet
+    render json: {token: @auth_token, user: user}, status: 201
 
   end
 
