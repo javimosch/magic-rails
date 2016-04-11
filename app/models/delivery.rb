@@ -41,7 +41,7 @@ class Delivery < ActiveRecord::Base
 			meta[:shop] = response
 		end
 
-		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'push', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
+		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
 
 	end
 

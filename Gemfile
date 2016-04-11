@@ -40,6 +40,8 @@ gem 'figaro'
 gem 'httparty'
 gem 'rpush'
 
+gem 'sinch_sms'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
