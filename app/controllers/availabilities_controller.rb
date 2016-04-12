@@ -4,7 +4,7 @@ class AvailabilitiesController < BaseController
   # GET /availabilities
   # GET /availabilities.json
   def index
-    @availabilities = Availability.where(deliveryman_id: current_user.id)
+    @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, match: false).where('schedules.date >= ?', Time.now.beginning_of_day)
   end
 
   # GET /availabilities/1

@@ -41,19 +41,29 @@ class Delivery < ActiveRecord::Base
 			meta[:shop] = response
 		end
 
-		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'push', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
+		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
 
 	end
 
 	def calculate_commission
 		if !total.nil?
-			self.update_column(:commission, self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100))
+			@commission = Commission.last
+			if @commission.present?
+				self.update_column(:commission, self.total * (@commission.percentage / 100))
+			else
+				self.update_column(:commission, self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100))
+			end
 		end
 	end
 
 	def calculate_shipping_total
 		if !total.nil?
-			self.update_column(:shipping_total, self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100))
+			@commission = Commission.last
+			if @commission.present?
+				self.update_column(:shipping_total, self.total * (@commission.shipping_percentage / 100))
+			else
+				self.update_column(:commission, self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100))
+			end
 		end
 	end
 
