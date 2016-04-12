@@ -1,17 +1,49 @@
 ActiveAdmin.register Notification do
 
-# See permitted parameters documentation:
-# https://github.com/activeadmin/activeadmin/blob/master/docs/2-resource-customization.md#setting-up-strong-parameters
-#
-# permit_params :list, :of, :attributes, :on, :model
-#
-# or
-#
-# permit_params do
-#   permitted = [:permitted, :attributes]
-#   permitted << :other if resource.something?
-#   permitted
-# end
+	permit_params :title, :content, :read
 
+	index do
+		column :id
+		column :mode
+		column :title
+		column :sender
+		column :read
+		column :created_at
+		column :updated_at
+		actions
+	end
+
+	show do
+		attributes_table do
+			row :id
+			row :mode
+			row :title
+			row :content
+			row :sender
+			row :meta
+			row :read
+			row :created_at
+			row :updated_at
+		end
+	end
+
+	form do |f|
+		f.inputs do
+			f.input :title
+			f.input :content
+			f.input :read
+		end
+		f.actions
+	end
+
+	csv do
+		column :id
+		column :mode
+		column :title
+		column :sender
+		column :read
+		column :created_at
+		column :updated_at
+	end
 
 end
