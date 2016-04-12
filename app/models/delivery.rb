@@ -47,13 +47,23 @@ class Delivery < ActiveRecord::Base
 
 	def calculate_commission
 		if !total.nil?
-			self.update_column(:commission, self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100))
+			@commission = Commission.last
+			if @commission.present?
+				self.update_column(:commission, self.total * (@commission.percentage / 100))
+			else
+				self.update_column(:commission, self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100))
+			end
 		end
 	end
 
 	def calculate_shipping_total
 		if !total.nil?
-			self.update_column(:shipping_total, self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100))
+			@commission = Commission.last
+			if @commission.present?
+				self.update_column(:shipping_total, self.total * (@commission.shipping_percentage / 100))
+			else
+				self.update_column(:commission, self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100))
+			end
 		end
 	end
 
