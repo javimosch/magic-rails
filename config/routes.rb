@@ -21,6 +21,8 @@ Rails.application.routes.draw do
   post '/deliveries/:id/finalize' => 'deliveries#finalize', :defaults => { :format => :json }
   get 'products' => 'shops#products', :defaults => { :format => :json }
 
+  get 'app' => 'home#index', :defaults => { :format => :html }
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
