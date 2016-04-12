@@ -1,0 +1,27 @@
+# Installation de DPL pour faciliter les déploiements (https://github.com/travis-ci/dpl)
+before_script:
+  - gem install dpl
+
+# Tous les commits sont deployés sur la plateforme de test
+develop:
+  type: deploy
+  script:
+  - dpl --provider=heroku --app=shopmycourses-develop --api-key=$HEROKU_API_KEY
+  only:
+  - develop
+#
+# # Les commits de release sont deployés sur la plateforme d'évaluation (staging)
+# staging:
+#   type: deploy
+#   script:
+#   - dpl --provider=heroku --app=pinotbleu-test --api-key=$HEROKU_API_KEY
+#   only:
+#   - /^release\/.*$/
+
+# Les commits de master sont deployés sur la plateforme de production
+production:
+  type: deploy
+  script:
+  - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
+  only:
+  - master
