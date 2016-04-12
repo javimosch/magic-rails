@@ -41,7 +41,12 @@ class Delivery < ActiveRecord::Base
 			meta[:shop] = response
 		end
 
-		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
+		@others = Delivery.joins(:availability).where('availabilities.schedule_id = ? AND availabilities.shop_id = ? AND availabilities.deliveryman_id != ?', @availability.schedule_id, @availability.shop_id, @availability.deliveryman_id)
+		@others.each do |other|
+			Notification.find_by(delivery_id: other.id).update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison n\'est plus disponible')
+		end
+
+		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: self.id
 
 	end
 
