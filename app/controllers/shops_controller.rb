@@ -6,7 +6,7 @@ class ShopsController < BaseController
 
     @response = []
 
-    if params[:address]
+    if params[:address].present? && !params[:address].blank?
       response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
         mct: ENV['MASTERCOURSE_KEY'],
         address: params[:address],
