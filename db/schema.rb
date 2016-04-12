@@ -151,7 +151,7 @@ ActiveRecord::Schema.define(version: 20160412084518) do
     t.string   "firstname"
     t.string   "lastname"
     t.string   "phone"
-    t.string   "share_phone"
+    t.boolean  "share_phone",            default: false
     t.string   "avatar"
     t.float    "rating_average"
     t.datetime "created_at",                               null: false
