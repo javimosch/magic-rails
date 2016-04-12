@@ -18,4 +18,8 @@ class User < ActiveRecord::Base
 		Notifier.send_registration(self).deliver
 	end
 
+	def count_deliveries
+		Delivery.joins(:delivery_request).joins(:availability).where('status = ? AND (delivery_requests.buyer_id = ? OR availabilities.deliveryman_id = ?)', 'done', id, id).count
+	end
+
 end
