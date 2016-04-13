@@ -55,11 +55,24 @@ class ShopsController < BaseController
             end
           end
 
+          count = Hash.new(0);
+          newResponse = []
+          @response.each do |shop|
+            count[shop['id'].to_i] += 1
+          end
+
+          count.each do |shop_id, v|
+            shop = @response.select {|s| s['id'].to_i == shop_id}.first
+            ap shop
+            shop[:count] = v.to_i
+            newResponse.push(shop)
+          end
+          @response = newResponse
         end
       else
         @response = response
       end
-      
+
     end
 
   end
