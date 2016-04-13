@@ -170,6 +170,7 @@ class DeliveriesController < BaseController
 
         meta[:availability] = @delivery_availability
         meta[:delivery_request] = @delivery_request
+        meta[:delivery] = @delivery
         meta[:buyer] = @delivery_request.buyer
         meta[:address] = @delivery_request.address
         meta[:schedule] = @delivery_request.schedule
