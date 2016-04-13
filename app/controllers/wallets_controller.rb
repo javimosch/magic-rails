@@ -59,7 +59,7 @@ class WalletsController < BaseController
         version: '1.8',
         walletIp: request.remote_ip,
         walletUa: 'ruby/rails',
-        wallet: @wallet.id,
+        wallet: @wallet.lemonway_id,
         cardType: params[:card][:type],
         cardNumber: params[:card][:number],
         cardCode: params[:card][:cvv],

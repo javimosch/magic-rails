@@ -28,7 +28,7 @@ class Wallet < ActiveRecord::Base
 		if !details['d']['WALLET'].nil?
 			ap "DETAILS"
 			ap details
-			self.update(lemonway_id: details['d']['WALLET']['LWID'])
+			self.update(lemonway_id: details['d']['WALLET']['ID'])
 
 		else
 			ap "ELSE"
@@ -43,7 +43,7 @@ class Wallet < ActiveRecord::Base
 					version: '1.8',
 					walletIp: '127.0.0.1',
 					walletUa: 'ruby/rails',
-					wallet: id,
+					wallet: created_at.to_time.to_i,
 					clientMail: user.email,
 					clientTitle: 'U',
 					clientFirstName: user.firstname,
@@ -75,7 +75,7 @@ class Wallet < ActiveRecord::Base
 			if wallet.code == 200
 
 				if !wallet['d']['WALLET'].nil?
-					self.update(lemonway_id: wallet['d']['WALLET']['LWID'])
+					self.update(lemonway_id: wallet['d']['WALLET']['ID'])
 				elsif !wallet['d']['E'].nil?
 					ap "LEMONWAY ERROR"
 					ap wallet['d']['E']
