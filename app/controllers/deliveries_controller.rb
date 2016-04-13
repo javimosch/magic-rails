@@ -133,7 +133,7 @@ class DeliveriesController < BaseController
 
         Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i)
         format.html { render :new }
-        format.json { render json: { notice: 'RATING_DONE' }, status: :unprocessable_entity }
+        format.json { render json: { notice: 'RATING_DONE' }, status: :ok }
 
       # Mauvais code de validation
       else
