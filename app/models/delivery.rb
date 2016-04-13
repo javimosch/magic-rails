@@ -13,6 +13,11 @@ class Delivery < ActiveRecord::Base
 	after_save :calculate_commission
 	after_save :calculate_shipping_total
 
+	def buyer_rating
+		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
+	end
+
+
 	private
 
 	def generate_validation_code(size = 6)

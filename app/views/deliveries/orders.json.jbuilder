@@ -33,6 +33,7 @@ json.array!(@deliveries) do |delivery|
 	json.address delivery.delivery_request.address
 	json.availability delivery.availability
 	json.schedule delivery.delivery_request.schedule
+	json.buyer_rating delivery.buyer_rating
 	response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}", query: {
 		mct: ENV['MASTERCOURSE_KEY']
 	})
