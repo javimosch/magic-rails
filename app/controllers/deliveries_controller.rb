@@ -175,7 +175,7 @@ class DeliveriesController < BaseController
         meta[:schedule] = @delivery_request.schedule
         meta[:shop] = nil
 
-        Notification.create! mode: 'delivery_request', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery_availability.deliveryman_id, meta: meta.to_json, read: false
+        Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery_availability.deliveryman_id, meta: meta.to_json, read: false
 
         format.html { redirect_to @delivery, notice: 'Delivery was successfully updated.' }
         format.json { render :show, status: :ok, location: @delivery }
