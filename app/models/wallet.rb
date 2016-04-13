@@ -21,17 +21,15 @@ class Wallet < ActiveRecord::Base
 				walletUa: 'ruby/rails',
 				wallet: '',
 				email: user.email
-			}.to_json,
-			debug_output: $stdout
+			}.to_json
 		);
 
 		if !details['d']['WALLET'].nil?
-			ap "DETAILS"
-			ap details
+
 			self.update(lemonway_id: details['d']['WALLET']['LWID'])
 
 		else
-			ap "ELSE"
+
 			wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/RegisterWallet',
 				headers: {
 					'Content-Type' => 'application/json; charset=utf-8',
@@ -66,11 +64,8 @@ class Wallet < ActiveRecord::Base
 					birthcountry: 'FRA',
 					payerOrBeneficiary: '',
 					isOneTimeCustomer: '0'
-				}.to_json,
-				debug_output: $stdout
+				}.to_json
 		    );
-
-		    ap wallet
 
 			if wallet.code == 200
 
