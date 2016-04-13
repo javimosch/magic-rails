@@ -22,7 +22,7 @@ class DeliveriesController < BaseController
     @deliveries = DeliveryRequest.where(buyer_id: current_user.id, match: true)
     ids = []
     @deliveries.each do |delivery|
-      ids.push(delivery.delivery_id)
+      ids.push(delivery.id)
     end
     @deliveries = Delivery.where(delivery_request_id: ids)
 
