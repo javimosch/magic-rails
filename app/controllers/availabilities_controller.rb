@@ -42,20 +42,13 @@ class AvailabilitiesController < BaseController
           this.schedule = hours
           this.was_created = true
         end
-        if @schedule.was_created
-          @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
-        end
+        @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
       end
     end
 
     respond_to do |format|
-      if @schedule.was_created
-        format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
-        format.json { render :show, status: :created, location: @availability }
-      else
-        format.html { render :new }
-        format.json { render json: {notice: 'SCHEDULE_ALREADY_EXIST'}, status: 409 }
-      end
+      format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
+      format.json { render :show, status: :created, location: @availability }
     end
   end
 

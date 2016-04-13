@@ -2,7 +2,7 @@ class Availability < ActiveRecord::Base
 
 	belongs_to :deliveryman, class_name: 'User'
 	belongs_to :deliveries
-	has_one :schedule, foreign_key: 'id', primary_key: 'id', dependent: :destroy
+	belongs_to :schedule
 
 	after_create :check_delivery_request
 

@@ -14,10 +14,10 @@ class DeliveryRequest < ActiveRecord::Base
 
 		if (Availability.exists?(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true))
 			
-			@availability = Availability.find_by(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true)
+			@availabilities = Availability.where(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true)
+
 
 			meta = {}
-			meta[:availability] = @availability
 			meta[:delivery_request] = self
 			meta[:buyer] = self.buyer
 			meta[:address] = self.address
@@ -30,10 +30,14 @@ class DeliveryRequest < ActiveRecord::Base
 				meta[:shop] = response
 			end
 
-			Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: @availability.deliveryman_id, meta: meta.to_json, read: false
+			@availabilities.each do |availability|
+				meta[:availability] = availability
+				Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: availability.deliveryman_id, meta: meta.to_json, read: false
+				availability.update(match: true)
+			end
+
 
 			self.update(match: true)
-			@availability.update(match: true)
 
 		end
 
