@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
 	end
 
 	def send_registration_notification
-		Notifier.send_registration(self).deliver
+		Notifier.send_registration(self).deliver_now
 	end
 
 	def count_deliveries
