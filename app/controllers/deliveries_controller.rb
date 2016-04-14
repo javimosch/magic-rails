@@ -65,6 +65,8 @@ class DeliveriesController < BaseController
   # POST /deliveries/1/finalize.json
   def finalize
 
+    proxy = URI(ENV['FIXIE_URL'])
+
     respond_to do |format|
 
       # Le livreur entre le code et note le livré
@@ -75,6 +77,10 @@ class DeliveriesController < BaseController
         if !@wallet.lemonway_id.nil? && !@wallet.lemonway_card_id.nil?
 
           response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
+            http_proxyaddr: proxy.host,
+            http_proxyport: proxy.port,
+            http_proxyuser: proxy.user,
+            http_proxypass: proxy.password,
             headers: {
               'Content-Type' => 'application/json; charset=utf-8',
             },

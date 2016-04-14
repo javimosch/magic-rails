@@ -42,13 +42,13 @@ class WalletsController < BaseController
   # PATCH/PUT /wallets/1.json
   def update
 
-    # proxy_params = ENV['FIXIE_URL'].replace('http://', '').split('@');
-    # http_proxyaddr = proxy_params[1].split(':')[0];
-    # http_proxyport = proxy_params[1].split(':')[1];
-    # http_proxyuser = proxy_params[0].split(':')[0];
-    # http_proxypass = proxy_params[0].split(':')[1];
+    proxy = URI(ENV['FIXIE_URL'])
 
     response = HTTParty.post(ENV['LEMONWAY_URL'] + '/RegisterCard',
+      http_proxyaddr: proxy.host,
+      http_proxyport: proxy.port,
+      http_proxyuser: proxy.user,
+      http_proxypass: proxy.password,
       headers: {
         'Content-Type' => 'application/json; charset=utf-8',
       },

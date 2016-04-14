@@ -8,7 +8,13 @@ class Wallet < ActiveRecord::Base
 
 	def register
 
+		proxy = URI(ENV['FIXIE_URL'])
+
 		details = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+			http_proxyaddr: proxy.host,
+			http_proxyport: proxy.port,
+			http_proxyuser: proxy.user,
+			http_proxypass: proxy.password,
 			headers: {
 				'Content-Type' => 'application/json; charset=utf-8',
 			},
@@ -31,10 +37,12 @@ class Wallet < ActiveRecord::Base
 				lemonway_card_id = details['d']['WALLET']['CARDS'][cardsNb - 1]['ID']
 			end
 			self.update(lemonway_id: details['d']['WALLET']['ID'], credit_card_display: credit_card_display, lemonway_card_id: lemonway_card_id)
-
 		else
-			ap "ELSE"
 			wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/RegisterWallet',
+				http_proxyaddr: proxy.host,
+				http_proxyport: proxy.port,
+				http_proxyuser: proxy.user,
+				http_proxypass: proxy.password,
 				headers: {
 					'Content-Type' => 'application/json; charset=utf-8',
 				},
@@ -70,8 +78,6 @@ class Wallet < ActiveRecord::Base
 					isOneTimeCustomer: '0'
 				}.to_json
 		    );
-
-		    ap wallet
 
 			if wallet.code == 200
 
