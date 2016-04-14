@@ -214,6 +214,6 @@ class DeliveriesController < BaseController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def delivery_params
-    params.require(:delivery).permit(:total, :availability_id, :delivery_request_id, :delivery_contents)
+    params.require(:delivery).permit(:availability_id, :delivery_request_id, :delivery_contents)
   end
 end

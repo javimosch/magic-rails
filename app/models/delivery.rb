@@ -7,8 +7,8 @@ class Delivery < ActiveRecord::Base
 	after_create :send_accepted_delivery
 	before_create :check_duplicate
 
-	after_save :calculate_commission
-	after_save :calculate_shipping_total
+	before_save :calculate_commission
+	before_save :calculate_shipping_total
 
 	def buyer_rating
 		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
@@ -50,9 +50,6 @@ class Delivery < ActiveRecord::Base
 		end
 
 		@others = Availability.where('schedule_id = ? AND shop_id = ? AND deliveryman_id != ?', @availability.schedule_id, @availability.shop_id, @availability.deliveryman_id)
-		# @others = Delivery.joins(:availability).where(availabilities: {schedule_id: @availability.schedule_id}, availabilities: {shop_id: @availability.shop_id}).where.not(availabilities: {delivery_id: @availability.deliveryman_id})
-		ap "OTHERS"
-		ap @others
 		@others.each do |other|
 			Notification.find_by(user_id: other.deliveryman_id).update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison n\'est plus disponible')
 		end
@@ -65,9 +62,9 @@ class Delivery < ActiveRecord::Base
 		if !total.nil?
 			@commission = Commission.last
 			if @commission.present?
-				self.update_column(:commission, self.total * (@commission.percentage / 100))
+				self.commission = self.total * (@commission.percentage / 100)
 			else
-				self.update_column(:commission, self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100))
+				self.commission = self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100)
 			end
 		end
 	end
@@ -76,9 +73,9 @@ class Delivery < ActiveRecord::Base
 		if !total.nil?
 			@commission = Commission.last
 			if @commission.present?
-				self.update_column(:shipping_total, self.total * (@commission.shipping_percentage / 100))
+				self.shipping_total = self.total * (@commission.shipping_percentage / 100)
 			else
-				self.update_column(:commission, self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100))
+				self.shipping_total = self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100)
 			end
 		end
 	end
