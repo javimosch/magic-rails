@@ -11,7 +11,6 @@ class DeliveriesController < BaseController
       ids.push(order.id)
     end
     @deliveries = Delivery.where(availability_id: ids)
-
   end
 
   # GET /orders
