@@ -14,6 +14,8 @@ class Notification < ActiveRecord::Base
 	    	ap 'Send push'
 	    elsif self.sender == 'sms'
 	    	ap 'Send sms'
+            sms = "#{self.title}\nRendez-vous sur l'appli: http://goo.gl/HHnGdx"
+            SinchSms.send(ENV["SINCH_KEY"], ENV["SINCH_SECRET"], sms, self.user.phone)
 	    end
 	end
 

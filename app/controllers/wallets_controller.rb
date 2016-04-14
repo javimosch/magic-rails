@@ -42,7 +42,13 @@ class WalletsController < BaseController
   # PATCH/PUT /wallets/1.json
   def update
 
+    proxy = URI(ENV['FIXIE_URL'])
+
     response = HTTParty.post(ENV['LEMONWAY_URL'] + '/RegisterCard',
+      http_proxyaddr: proxy.host,
+      http_proxyport: proxy.port,
+      http_proxyuser: proxy.user,
+      http_proxypass: proxy.password,
       headers: {
         'Content-Type' => 'application/json; charset=utf-8',
       },
@@ -53,7 +59,7 @@ class WalletsController < BaseController
         version: '1.8',
         walletIp: request.remote_ip,
         walletUa: 'ruby/rails',
-        wallet: @wallet.id,
+        wallet: @wallet.lemonway_id,
         cardType: params[:card][:type],
         cardNumber: params[:card][:number],
         cardCode: params[:card][:cvv],
@@ -70,8 +76,6 @@ class WalletsController < BaseController
           format.json { render :show, status: :ok, location: @wallet }
         end
       elsif !response['d']['E'].nil?
-        ap "LEMONWAY ERROR"
-        ap response['d']['E']
         respond_to do |format|
           format.html { render :edit }
           format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }

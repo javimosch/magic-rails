@@ -6,12 +6,20 @@ class ShopsController < BaseController
 
     @response = []
 
-    response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
-      mct: ENV['MASTERCOURSE_KEY'],
-      lat: params[:lat],
-      lon: params[:lon],
-      number: ENV['SHOPS_NUMBER']
-    });
+    if params[:address].present? && !params[:address].blank?
+      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+        mct: ENV['MASTERCOURSE_KEY'],
+        address: params[:address],
+        number: ENV['SHOPS_NUMBER']
+      });
+    else
+      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+        mct: ENV['MASTERCOURSE_KEY'],
+        lat: params[:lat],
+        lon: params[:lon],
+        number: ENV['SHOPS_NUMBER']
+      });
+    end
 
     if response.code == 200
    
@@ -38,20 +46,33 @@ class ShopsController < BaseController
         if (Schedule.exists?(date: @date, schedule: @hours))
 
           @schedule = Schedule.find_by(date: @date, schedule: @hours)
-          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?)", @schedule.id, shop_ids, rated_users)
+          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?) AND delivery_id IS NULL", @schedule.id, shop_ids, rated_users)
           @availability.each do |availability|
             response.each do |shop|
-              if availability.shop_id = shop['id'].to_i
+              if availability.shop_id == shop['id'].to_i
                 @response.push(shop)
               end
             end
           end
 
+          count = Hash.new(0);
+          newResponse = []
+          @response.each do |shop|
+            count[shop['id'].to_i] += 1
+          end
+
+          count.each do |shop_id, v|
+            shop = @response.select {|s| s['id'].to_i == shop_id}.first
+            ap shop
+            shop[:count] = v.to_i
+            newResponse.push(shop)
+          end
+          @response = newResponse
         end
       else
         @response = response
       end
-      
+
     end
 
   end

@@ -2,7 +2,7 @@ class Availability < ActiveRecord::Base
 
 	belongs_to :deliveryman, class_name: 'User'
 	belongs_to :deliveries
-	has_one :schedule, foreign_key: 'id', primary_key: 'id', dependent: :destroy
+	belongs_to :schedule
 
 	after_create :check_delivery_request
 
@@ -28,7 +28,7 @@ class Availability < ActiveRecord::Base
 				meta[:shop] = response
 			end
 
-			Notification.create! mode: 'availability', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: self.deliveryman_id, meta: meta.to_json, read: false
+			Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: self.deliveryman_id, meta: meta.to_json, read: false
 
 			@delivery_request.update(match: true)
 			self.update(match: true)
