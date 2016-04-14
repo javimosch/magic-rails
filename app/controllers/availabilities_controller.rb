@@ -35,11 +35,12 @@ class AvailabilitiesController < BaseController
     schedules = params[:schedules]
 
     schedules.each do |schedule|
-      schedule[1].each do |hours|
+      hours = schedules[schedule[0]]
+      hours.each do |hour|
         date = Date.parse(schedule[0]).beginning_of_day()
-        @schedule = Schedule.find_or_create_by(date: date, schedule: hours) do |this|
+        @schedule = Schedule.find_or_create_by(date: date, schedule: hour) do |this|
           this.date = date
-          this.schedule = hours
+          this.schedule = hour
           this.was_created = true
         end
         @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
