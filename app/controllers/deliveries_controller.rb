@@ -151,6 +151,15 @@ class DeliveriesController < BaseController
   def update
 
     delivery_contents = params[:delivery_contents]
+
+    if delivery_contents.nil?
+      respond_to do |format|
+        format.json { render json: { notice: 'EMPTY_CART' }, status: :unprocessable_entity }
+        format.html { render :new }
+      end
+      return
+    end
+
     total = 0
     DeliveryContent.destroy_all(id_delivery: @delivery.id)
     delivery_contents.each do |delivery_content|
