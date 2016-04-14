@@ -10,14 +10,18 @@ class RegistrationsController < BaseController
 			@user = User.new(user_params)
 			if @user.save
 				@auth_token = jwt_token(@user, user_params['password'])
-				wallet = Wallet.create! user_id: @user.id
-				@user.update({wallet_id: wallet.id})
+				@wallet = Wallet.create! user_id: @user.id
+				if @wallet.errors.present?
+					render json: {errors: @user.errors.messages}, status: 422
+				else
+					@user.update({wallet_id: @wallet.id})
+				end
 			end
 			if @user.errors.present?
 				render json: {errors: @user.errors.messages}, status: 422
 			else
 				user = @user.as_json
-				user[:wallet] = wallet
+				user[:wallet] = @wallet
 				render json: {token: @auth_token, user: user}, status: 201
 			end
 		end
