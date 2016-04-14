@@ -16,7 +16,9 @@ class RegistrationsController < BaseController
 			if @user.errors.present?
 				render json: {errors: @user.errors.messages}, status: 422
 			else
-				render json: {token: @auth_token, user: @user}, status: 201
+				user = @user.as_json
+				user[:wallet] = wallet
+				render json: {token: @auth_token, user: user}, status: 201
 			end
 		end
 	end
