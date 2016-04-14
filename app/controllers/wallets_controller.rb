@@ -76,8 +76,6 @@ class WalletsController < BaseController
           format.json { render :show, status: :ok, location: @wallet }
         end
       elsif !response['d']['E'].nil?
-        ap "LEMONWAY ERROR"
-        ap response['d']['E']
         respond_to do |format|
           format.html { render :edit }
           format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }

@@ -21,14 +21,16 @@ class Wallet < ActiveRecord::Base
 				walletUa: 'ruby/rails',
 				wallet: '',
 				email: user.email
-			}.to_json,
-			debug_output: $stdout
+			}.to_json
 		);
 
 		if !details['d']['WALLET'].nil?
-			ap "DETAILS"
-			ap details
-			self.update(lemonway_id: details['d']['WALLET']['ID'])
+			cardsNb = details['d']['WALLET']['CARDS'].count
+			if cardsNb > 0
+				credit_card_display = details['d']['WALLET']['CARDS'][cardsNb - 1]['EXTRA']['NUM']
+				lemonway_card_id = details['d']['WALLET']['CARDS'][cardsNb - 1]['ID']
+			end
+			self.update(lemonway_id: details['d']['WALLET']['ID'], credit_card_display: credit_card_display, lemonway_card_id: lemonway_card_id)
 
 		else
 			ap "ELSE"
@@ -66,8 +68,7 @@ class Wallet < ActiveRecord::Base
 					birthcountry: 'FRA',
 					payerOrBeneficiary: '',
 					isOneTimeCustomer: '0'
-				}.to_json,
-				debug_output: $stdout
+				}.to_json
 		    );
 
 		    ap wallet
@@ -75,10 +76,9 @@ class Wallet < ActiveRecord::Base
 			if wallet.code == 200
 
 				if !wallet['d']['WALLET'].nil?
-					self.update(lemonway_id: wallet['d']['WALLET']['ID'])
+					self.update(lemonway_id: details['d']['WALLET']['ID'])
 				elsif !wallet['d']['E'].nil?
-					ap "LEMONWAY ERROR"
-					ap wallet['d']['E']
+					raise 'Wallet not found'
 				end
 
 			end
