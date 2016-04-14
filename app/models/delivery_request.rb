@@ -32,7 +32,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 			@availabilities.each do |availability|
 				meta[:availability] = availability
-				Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: availability.deliveryman_id, meta: meta.to_json, read: false
+				Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'sms', user_id: availability.deliveryman_id, meta: meta.to_json, read: false
 				availability.update(match: true)
 			end
 
