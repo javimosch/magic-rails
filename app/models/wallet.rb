@@ -76,7 +76,7 @@ class Wallet < ActiveRecord::Base
 			if wallet.code == 200
 
 				if !wallet['d']['WALLET'].nil?
-					self.update(lemonway_id: details['d']['WALLET']['ID'])
+					self.update(lemonway_id: wallet['d']['WALLET']['ID'])
 				elsif !wallet['d']['E'].nil?
 					raise 'Wallet not found'
 				end
