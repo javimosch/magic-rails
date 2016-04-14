@@ -28,7 +28,7 @@ class Availability < ActiveRecord::Base
 				meta[:shop] = response
 			end
 
-			Notification.create! mode: 'availability', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: self.deliveryman_id, meta: meta.to_json, read: false
+			Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'push', user_id: self.deliveryman_id, meta: meta.to_json, read: false
 
 			@delivery_request.update(match: true)
 			self.update(match: true)
