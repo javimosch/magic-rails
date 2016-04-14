@@ -46,7 +46,7 @@ class ShopsController < BaseController
         if (Schedule.exists?(date: @date, schedule: @hours))
 
           @schedule = Schedule.find_by(date: @date, schedule: @hours)
-          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?)", @schedule.id, shop_ids, rated_users)
+          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?) AND delivery_id IS NULL", @schedule.id, shop_ids, rated_users)
           @availability.each do |availability|
             response.each do |shop|
               if availability.shop_id == shop['id'].to_i
