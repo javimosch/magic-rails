@@ -5,7 +5,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 
 	has_one :address, foreign_key: 'id', primary_key: 'address_id'
-	has_one :delivery
+	has_one :delivery, dependent: :destroy
 	has_one :schedule, foreign_key: 'id', primary_key: 'schedule_id'
 
 	after_create :check_availability
@@ -14,7 +14,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 		if (Availability.exists?(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true))
 			
-			@availabilities = Availability.where(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true)
+			@availabilities = Availability.where(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true, delivery_id: nil)
 
 
 			meta = {}

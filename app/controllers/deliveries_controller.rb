@@ -1,5 +1,5 @@
 class DeliveriesController < BaseController
-  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize]
+  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm]
 
   # GET /deliveries
   # GET /deliveries.json
@@ -17,7 +17,7 @@ class DeliveriesController < BaseController
   # GET /orders.json
   def orders
 
-    @orders = DeliveryRequest.where(buyer_id: current_user.id, match: false)
+    @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true)
     @deliveries = DeliveryRequest.where(buyer_id: current_user.id, match: true)
     ids = []
     @deliveries.each do |delivery|
@@ -57,6 +57,37 @@ class DeliveriesController < BaseController
       else
         format.html { render :new }
         format.json { render json: @delivery.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # POST /deliveries/1/confirm
+  # POST /deliveries/1/confirm.json
+  def confirm
+    respond_to do |format|
+      if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
+          Delivery.update(@delivery.id, :status => 'completed')
+
+          @delivery = Delivery.find(@delivery.id)
+          @delivery_request = @delivery.delivery_request
+          @delivery_availability = @delivery.availability
+          meta = {}
+
+          meta[:availability] = @delivery_availability
+          meta[:delivery_request] = @delivery_request
+          meta[:delivery] = @delivery
+          meta[:buyer] = @delivery_request.buyer
+          meta[:address] = @delivery_request.address
+          meta[:schedule] = @delivery_request.schedule
+          meta[:shop] = nil
+
+          Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+          format.json { head :no_content }
+
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
       end
     end
   end
@@ -172,26 +203,10 @@ class DeliveriesController < BaseController
       total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    Delivery.update(@delivery.id, :status => 'completed', :total => total)
-
-    @delivery = Delivery.find(@delivery.id)
+    Delivery.update(@delivery.id, :total => total)
 
     respond_to do |format|
       if @delivery.update(delivery_params)
-        @delivery_request = @delivery.delivery_request
-        @delivery_availability = @delivery.availability
-        meta = {}
-
-        meta[:availability] = @delivery_availability
-        meta[:delivery_request] = @delivery_request
-        meta[:delivery] = @delivery
-        meta[:buyer] = @delivery_request.buyer
-        meta[:address] = @delivery_request.address
-        meta[:schedule] = @delivery_request.schedule
-        meta[:shop] = nil
-
-        Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery_availability.deliveryman_id, meta: meta.to_json, read: false
-
         format.html { redirect_to @delivery, notice: 'Delivery was successfully updated.' }
         format.json { render :show, status: :ok, location: @delivery }
       else
