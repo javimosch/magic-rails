@@ -30,5 +30,7 @@ module ShopmycourseServer
       end
     end
 
+    config.action_controller.perform_caching = true
+
   end
 end

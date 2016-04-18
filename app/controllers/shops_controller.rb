@@ -22,7 +22,7 @@ class ShopsController < BaseController
     end
 
     if response.code == 200
-   
+
       if params[:schedule].present? && params[:stars].present?
 
         rated_users = []
@@ -80,39 +80,35 @@ class ShopsController < BaseController
   # GET /products
   # GET /products.json
   def products
-
     @response = []
 
-    store = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/", query: {
-      mct: ENV['MASTERCOURSE_KEY']
-    });
-
-    if store.code == 200
-
-      products = HTTParty.get("https://www.mastercourses.com/api2/chains/#{store['chain_id']}/products/search/", query: {
-        mct: ENV['MASTERCOURSE_KEY'],
-        q: params['q']
-      });
-
-      if products.code == 200
-
-        products.take(ENV['PRODUCT_SEARCH_LIMIT'].to_i).each do |product|
-
-          response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/#{product['id']}/", query: {
-            mct: ENV['MASTERCOURSE_KEY'],
-            q: params['q']
-          });
-
-          if response.code == 200
-            @response.push(response)
-          end
-
-        end
-
-      end
-
+    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
+    all_products = Rails.cache.fetch(url, expires_in: 30.days) do
+      HTTParty.get(url, query: {
+        mct: ENV['MASTERCOURSE_KEY']
+      }).parsed_response
     end
 
+    valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
+
+    valid_products.take(8).each do |product|
+      url = "https://www.mastercourses.com/api2/products/#{product['id']}/"
+      complete_product = Rails.cache.fetch(url, expires_in: 30.days) do
+        HTTParty.get(url, query: {
+          mct: ENV['MASTERCOURSE_KEY']
+        }).parsed_response
+      end
+      @response << complete_product
+    end
+  end
+
+  def includes_strings?(words, haystack)
+    words.downcase.split(' ').each do |word|
+      unless haystack.downcase.include? word
+        return false
+      end
+    end
+    return true
   end
 
   # GET /shops/1
