@@ -5,7 +5,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 
 	has_one :address, foreign_key: 'id', primary_key: 'address_id'
-	has_one :delivery
+	has_one :delivery, dependent: :destroy
 	has_one :schedule, foreign_key: 'id', primary_key: 'schedule_id'
 
 	after_create :check_availability
