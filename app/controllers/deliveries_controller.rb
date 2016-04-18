@@ -1,5 +1,5 @@
 class DeliveriesController < BaseController
-  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm]
+  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm, :cancel]
 
   # GET /deliveries
   # GET /deliveries.json
@@ -69,19 +69,30 @@ class DeliveriesController < BaseController
           Delivery.update(@delivery.id, :status => 'completed')
 
           @delivery = Delivery.find(@delivery.id)
-          @delivery_request = @delivery.delivery_request
-          @delivery_availability = @delivery.availability
-          meta = {}
-
-          meta[:availability] = @delivery_availability
-          meta[:delivery_request] = @delivery_request
-          meta[:delivery] = @delivery
-          meta[:buyer] = @delivery_request.buyer
-          meta[:address] = @delivery_request.address
-          meta[:schedule] = @delivery_request.schedule
-          meta[:shop] = nil
+          meta = meta_from_delivery(@delivery)
 
           Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+          format.json { head :no_content }
+
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # POST /deliveries/1/cancel
+  # POST /deliveries/1/cancel.json
+  def cancel
+    respond_to do |format|
+      if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
+          Delivery.update(@delivery.id, :status => 'canceled')
+
+          @delivery = Delivery.find(@delivery.id)
+          meta = meta_from_delivery(@delivery)
+
+          Notification.create! mode: 'outdated_delivery', title: 'Commande annulée', content: 'Votre client a annulé sa commande', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
           format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
           format.json { head :no_content }
 
@@ -235,5 +246,20 @@ class DeliveriesController < BaseController
   # Never trust parameters from the scary internet, only allow the white list through.
   def delivery_params
     params.require(:delivery).permit(:availability_id, :delivery_request_id, :delivery_contents)
+  end
+
+  def meta_from_delivery(delivery)
+      @delivery_request = delivery.delivery_request
+      @delivery_availability = delivery.availability
+      meta = {}
+
+      meta[:availability] = @delivery_availability
+      meta[:delivery_request] = @delivery_request
+      meta[:delivery] = delivery
+      meta[:buyer] = @delivery_request.buyer
+      meta[:address] = @delivery_request.address
+      meta[:schedule] = @delivery_request.schedule
+      meta[:shop] = nil
+      meta
   end
 end
