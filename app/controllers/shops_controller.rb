@@ -98,7 +98,7 @@ class ShopsController < BaseController
           mct: ENV['MASTERCOURSE_KEY']
         }).parsed_response
       end
-      @response << complete_product
+      @response << complete_product.merge(product)
     end
   end
 
