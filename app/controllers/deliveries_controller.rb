@@ -157,7 +157,7 @@ class DeliveriesController < BaseController
           if response.code == 200
 
             if !response['d']['TRANS']['HPAY'].nil?
-              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i)
+              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
               Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
               format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
               format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
