@@ -8,8 +8,13 @@ class Notifier < ApplicationMailer
 
   def send_registration(user)
     @user = user
-    ap @user
 
     mail to: user.email, subject: "Bienvenue !"
+  end
+
+  def send_cart_reminder(user)
+    @user = user
+
+    mail to: user.email, subject: "Rappel"
   end
 end
