@@ -1,6 +1,6 @@
 class Delivery < ActiveRecord::Base
 	has_many :delivery_contents, foreign_key: 'id_delivery'
-	has_one :availability, foreign_key: 'id', primary_key: 'availability_id'
+	belongs_to :availability
 	has_one :delivery_request, foreign_key: 'id', primary_key: 'delivery_request_id'
 
 	after_create :generate_validation_code
