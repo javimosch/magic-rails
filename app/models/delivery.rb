@@ -1,17 +1,36 @@
 class Delivery < ActiveRecord::Base
+	include DeliveriesHelper
+
 	has_many :delivery_contents, foreign_key: 'id_delivery'
 	belongs_to :availability
 	has_one :delivery_request, foreign_key: 'id', primary_key: 'delivery_request_id'
 
 	after_create :generate_validation_code
 	after_create :send_accepted_delivery
+	after_create :create_delayed_jobs
 	before_create :check_duplicate
 
 	before_save :calculate_commission
 	before_save :calculate_shipping_total
 
+
 	def buyer_rating
 		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
+	end
+
+
+	def create_delayed_jobs
+		@schedule = self.delivery_request.schedule
+		from = @schedule.schedule.split('-')[0].to_i
+		@date = @schedule.date + from.hours
+
+		@mail_reminder = @date - 2.hours
+		@sms_reminder = @date - 15.minutes
+		@delete_cart = @date
+
+		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
+		ap Delivery.delay(run_at: @sms_reminder).sms_reminder(self.id)
+		ap Delivery.delay(run_at: @delete_cart).delete_cart(self.id)
 	end
 
 

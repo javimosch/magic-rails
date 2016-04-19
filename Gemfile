@@ -32,6 +32,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+gem 'delayed_job_active_record'
+gem 'daemons'
+
 gem 'devise'
 gem 'jwt'
 gem 'awesome_print'
