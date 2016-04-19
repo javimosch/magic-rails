@@ -1,5 +1,5 @@
 class DeliveriesController < BaseController
-  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize]
+  before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm, :cancel]
 
   # GET /deliveries
   # GET /deliveries.json
@@ -11,18 +11,17 @@ class DeliveriesController < BaseController
       ids.push(order.id)
     end
     @deliveries = Delivery.where(availability_id: ids)
-
   end
 
   # GET /orders
   # GET /orders.json
   def orders
 
-    @orders = DeliveryRequest.where(buyer_id: current_user.id, match: false)
+    @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true)
     @deliveries = DeliveryRequest.where(buyer_id: current_user.id, match: true)
     ids = []
     @deliveries.each do |delivery|
-      ids.push(delivery.delivery_id)
+      ids.push(delivery.id)
     end
     @deliveries = Delivery.where(delivery_request_id: ids)
 
@@ -62,9 +61,53 @@ class DeliveriesController < BaseController
     end
   end
 
+  # POST /deliveries/1/confirm
+  # POST /deliveries/1/confirm.json
+  def confirm
+    respond_to do |format|
+      if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
+          Delivery.update(@delivery.id, :status => 'completed')
+
+          @delivery = Delivery.find(@delivery.id)
+          meta = meta_from_delivery(@delivery)
+
+          Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+          format.json { head :no_content }
+
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # POST /deliveries/1/cancel
+  # POST /deliveries/1/cancel.json
+  def cancel
+    respond_to do |format|
+      if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
+          Delivery.update(@delivery.id, :status => 'canceled')
+
+          @delivery = Delivery.find(@delivery.id)
+          meta = meta_from_delivery(@delivery)
+
+          Notification.create! mode: 'outdated_delivery', title: 'Commande annulée', content: 'Votre client a annulé sa commande', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+          format.json { head :no_content }
+
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
+      end
+    end
+  end
+
   # POST /deliveries/1/finalize
   # POST /deliveries/1/finalize.json
   def finalize
+
+    proxy = URI(ENV['FIXIE_URL'])
 
     respond_to do |format|
 
@@ -76,6 +119,10 @@ class DeliveriesController < BaseController
         if !@wallet.lemonway_id.nil? && !@wallet.lemonway_card_id.nil?
 
           response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
+            http_proxyaddr: proxy.host,
+            http_proxyport: proxy.port,
+            http_proxyuser: proxy.user,
+            http_proxypass: proxy.password,
             headers: {
               'Content-Type' => 'application/json; charset=utf-8',
             },
@@ -86,10 +133,10 @@ class DeliveriesController < BaseController
               version: '1.8',
               walletIp: request.remote_ip,
               walletUa: 'ruby/rails',
-              wallet: @wallet.id,
+              wallet: @wallet.lemonway_id,
               cardId: @wallet.lemonway_card_id,
-              amountTot: @delivery.total,
-              amountCom: @delivery.commission,
+              amountTot: '%.2f' % @delivery.total,
+              amountCom: '%.2f' % @delivery.commission,
               comment: @delivery.status,
               message: @delivery.status,
               autoCommission: '0',
@@ -131,9 +178,9 @@ class DeliveriesController < BaseController
       # Le livré note le livreur
       elsif params[:rating].present? && current_user.id == @delivery.delivery_request.buyer_id
 
-        Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i)
+        Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
         format.html { render :new }
-        format.json { render json: { notice: 'RATING_DONE' }, status: :unprocessable_entity }
+        format.json { render json: { notice: 'RATING_DONE' }, status: :ok }
 
       # Mauvais code de validation
       else
@@ -151,6 +198,15 @@ class DeliveriesController < BaseController
   def update
 
     delivery_contents = params[:delivery_contents]
+
+    if delivery_contents.nil?
+      respond_to do |format|
+        format.json { render json: { notice: 'EMPTY_CART' }, status: :unprocessable_entity }
+        format.html { render :new }
+      end
+      return
+    end
+
     total = 0
     DeliveryContent.destroy_all(id_delivery: @delivery.id)
     delivery_contents.each do |delivery_content|
@@ -158,25 +214,10 @@ class DeliveriesController < BaseController
       total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    Delivery.update(@delivery.id, :status => 'completed', :total => total)
-
-    @delivery = Delivery.find(@delivery.id)
+    Delivery.update(@delivery.id, :total => total)
 
     respond_to do |format|
       if @delivery.update(delivery_params)
-        @delivery_request = @delivery.delivery_request
-        @delivery_availability = @delivery.availability
-        meta = {}
-
-        meta[:availability] = @delivery_availability
-        meta[:delivery_request] = @delivery_request
-        meta[:buyer] = @delivery_request.buyer
-        meta[:address] = @delivery_request.address
-        meta[:schedule] = @delivery_request.schedule
-        meta[:shop] = nil
-
-        Notification.create! mode: 'delivery_request', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery_availability.deliveryman_id, meta: meta.to_json, read: false
-
         format.html { redirect_to @delivery, notice: 'Delivery was successfully updated.' }
         format.json { render :show, status: :ok, location: @delivery }
       else
@@ -204,6 +245,21 @@ class DeliveriesController < BaseController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def delivery_params
-    params.require(:delivery).permit(:total, :availability_id, :delivery_request_id, :delivery_contents)
+    params.require(:delivery).permit(:availability_id, :delivery_request_id, :delivery_contents)
+  end
+
+  def meta_from_delivery(delivery)
+      @delivery_request = delivery.delivery_request
+      @delivery_availability = delivery.availability
+      meta = {}
+
+      meta[:availability] = @delivery_availability
+      meta[:delivery_request] = @delivery_request
+      meta[:delivery] = delivery
+      meta[:buyer] = @delivery_request.buyer
+      meta[:address] = @delivery_request.address
+      meta[:schedule] = @delivery_request.schedule
+      meta[:shop] = nil
+      meta
   end
 end

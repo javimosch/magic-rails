@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160412084518) do
+ActiveRecord::Schema.define(version: 20160419082611) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -77,6 +77,22 @@ ActiveRecord::Schema.define(version: 20160412084518) do
     t.datetime "updated_at",          null: false
   end
 
+  create_table "delayed_jobs", force: :cascade do |t|
+    t.integer  "priority",   default: 0, null: false
+    t.integer  "attempts",   default: 0, null: false
+    t.text     "handler",                null: false
+    t.text     "last_error"
+    t.datetime "run_at"
+    t.datetime "locked_at"
+    t.datetime "failed_at"
+    t.string   "locked_by"
+    t.string   "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
+
   create_table "deliveries", force: :cascade do |t|
     t.string   "status",              default: "pending"
     t.string   "validation_code"
@@ -118,8 +134,9 @@ ActiveRecord::Schema.define(version: 20160412084518) do
     t.integer  "user_id"
     t.string   "meta"
     t.boolean  "read"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "delivery_id"
   end
 
   create_table "ratings", force: :cascade do |t|
@@ -128,6 +145,7 @@ ActiveRecord::Schema.define(version: 20160412084518) do
     t.integer  "rating"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.integer  "delivery_id"
   end
 
   create_table "schedules", force: :cascade do |t|

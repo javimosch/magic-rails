@@ -6,7 +6,7 @@ class ShopsController < BaseController
 
     @response = []
 
-    if params[:address]
+    if params[:address].present? && !params[:address].blank?
       response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
         mct: ENV['MASTERCOURSE_KEY'],
         address: params[:address],
@@ -22,7 +22,7 @@ class ShopsController < BaseController
     end
 
     if response.code == 200
-   
+
       if params[:schedule].present? && params[:stars].present?
 
         rated_users = []
@@ -46,20 +46,33 @@ class ShopsController < BaseController
         if (Schedule.exists?(date: @date, schedule: @hours))
 
           @schedule = Schedule.find_by(date: @date, schedule: @hours)
-          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?)", @schedule.id, shop_ids, rated_users)
+          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?) AND delivery_id IS NULL", @schedule.id, shop_ids, rated_users)
           @availability.each do |availability|
             response.each do |shop|
-              if availability.shop_id = shop['id'].to_i
+              if availability.shop_id == shop['id'].to_i
                 @response.push(shop)
               end
             end
           end
 
+          count = Hash.new(0);
+          newResponse = []
+          @response.each do |shop|
+            count[shop['id'].to_i] += 1
+          end
+
+          count.each do |shop_id, v|
+            shop = @response.select {|s| s['id'].to_i == shop_id}.first
+            ap shop
+            shop[:count] = v.to_i
+            newResponse.push(shop)
+          end
+          @response = newResponse
         end
       else
         @response = response
       end
-      
+
     end
 
   end
@@ -67,39 +80,35 @@ class ShopsController < BaseController
   # GET /products
   # GET /products.json
   def products
-
     @response = []
 
-    store = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/", query: {
-      mct: ENV['MASTERCOURSE_KEY']
-    });
-
-    if store.code == 200
-
-      products = HTTParty.get("https://www.mastercourses.com/api2/chains/#{store['chain_id']}/products/search/", query: {
-        mct: ENV['MASTERCOURSE_KEY'],
-        q: params['q']
-      });
-
-      if products.code == 200
-
-        products.take(ENV['PRODUCT_SEARCH_LIMIT'].to_i).each do |product|
-
-          response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/#{product['id']}/", query: {
-            mct: ENV['MASTERCOURSE_KEY'],
-            q: params['q']
-          });
-
-          if response.code == 200
-            @response.push(response)
-          end
-
-        end
-
-      end
-
+    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
+    all_products = Rails.cache.fetch(url, expires_in: 30.days) do
+      HTTParty.get(url, query: {
+        mct: ENV['MASTERCOURSE_KEY']
+      }).parsed_response
     end
 
+    valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
+
+    valid_products.take(8).each do |product|
+      url = "https://www.mastercourses.com/api2/products/#{product['id']}/"
+      complete_product = Rails.cache.fetch(url, expires_in: 30.days) do
+        HTTParty.get(url, query: {
+          mct: ENV['MASTERCOURSE_KEY']
+        }).parsed_response
+      end
+      @response << complete_product.merge(product)
+    end
+  end
+
+  def includes_strings?(words, haystack)
+    words.downcase.split(' ').each do |word|
+      unless haystack.downcase.include? word
+        return false
+      end
+    end
+    return true
   end
 
   # GET /shops/1

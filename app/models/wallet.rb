@@ -8,7 +8,13 @@ class Wallet < ActiveRecord::Base
 
 	def register
 
+		proxy = URI(ENV['FIXIE_URL'])
+
 		details = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+			http_proxyaddr: proxy.host,
+			http_proxyport: proxy.port,
+			http_proxyuser: proxy.user,
+			http_proxypass: proxy.password,
 			headers: {
 				'Content-Type' => 'application/json; charset=utf-8',
 			},
@@ -25,12 +31,18 @@ class Wallet < ActiveRecord::Base
 		);
 
 		if !details['d']['WALLET'].nil?
-
-			self.update(lemonway_id: details['d']['WALLET']['LWID'])
-
+			cardsNb = details['d']['WALLET']['CARDS'].count
+			if cardsNb > 0
+				credit_card_display = details['d']['WALLET']['CARDS'][cardsNb - 1]['EXTRA']['NUM']
+				lemonway_card_id = details['d']['WALLET']['CARDS'][cardsNb - 1]['ID']
+			end
+			self.update(lemonway_id: details['d']['WALLET']['ID'], credit_card_display: credit_card_display, lemonway_card_id: lemonway_card_id)
 		else
-
 			wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/RegisterWallet',
+				http_proxyaddr: proxy.host,
+				http_proxyport: proxy.port,
+				http_proxyuser: proxy.user,
+				http_proxypass: proxy.password,
 				headers: {
 					'Content-Type' => 'application/json; charset=utf-8',
 				},
@@ -41,7 +53,7 @@ class Wallet < ActiveRecord::Base
 					version: '1.8',
 					walletIp: '127.0.0.1',
 					walletUa: 'ruby/rails',
-					wallet: id,
+					wallet: created_at.to_time.to_i,
 					clientMail: user.email,
 					clientTitle: 'U',
 					clientFirstName: user.firstname,
@@ -70,10 +82,9 @@ class Wallet < ActiveRecord::Base
 			if wallet.code == 200
 
 				if !wallet['d']['WALLET'].nil?
-					self.update(lemonway_id: wallet['d']['WALLET']['LWID'])
+					self.update(lemonway_id: wallet['d']['WALLET']['ID'])
 				elsif !wallet['d']['E'].nil?
-					ap "LEMONWAY ERROR"
-					ap wallet['d']['E']
+					raise 'Wallet not found'
 				end
 
 			end

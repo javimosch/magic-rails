@@ -4,7 +4,7 @@ class AvailabilitiesController < BaseController
   # GET /availabilities
   # GET /availabilities.json
   def index
-    @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, match: false).where('schedules.date >= ?', Time.now.beginning_of_day)
+    @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, delivery_id: nil).where('schedules.date >= ?', Time.now.beginning_of_day)
   end
 
   # GET /availabilities/1
@@ -35,27 +35,21 @@ class AvailabilitiesController < BaseController
     schedules = params[:schedules]
 
     schedules.each do |schedule|
-      schedule[1].each do |hours|
+      hours = schedules[schedule[0]]
+      hours.each do |hour|
         date = Date.parse(schedule[0]).beginning_of_day()
-        @schedule = Schedule.find_or_create_by(date: date, schedule: hours) do |this|
+        @schedule = Schedule.find_or_create_by(date: date, schedule: hour) do |this|
           this.date = date
-          this.schedule = hours
+          this.schedule = hour
           this.was_created = true
         end
-        if @schedule.was_created
-          @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
-        end
+        @availability = Availability.create! schedule_id: @schedule.id, shop_id: params[:shop_id], deliveryman_id: params[:deliveryman_id], enabled: true
       end
     end
 
     respond_to do |format|
-      if @schedule.was_created
-        format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
-        format.json { render :show, status: :created, location: @availability }
-      else
-        format.html { render :new }
-        format.json { render json: {notice: 'SCHEDULE_ALREADY_EXIST'}, status: 409 }
-      end
+      format.html { redirect_to @availability, notice: 'Availabilities was successfully created.' }
+      format.json { render :show, status: :created, location: @availability }
     end
   end
 
