@@ -1,7 +1,7 @@
 class Availability < ActiveRecord::Base
 
 	belongs_to :deliveryman, class_name: 'User'
-	belongs_to :deliveries, dependent: :destroy
+	has_many :deliveries
 	belongs_to :schedule
 
 	after_create :check_delivery_request
