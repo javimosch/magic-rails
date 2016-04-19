@@ -11,7 +11,7 @@ module DeliveriesHelper
 
 			#the buyer has not filled his cart
 			if @delivery && @delivery.status == 'accepted'
-				Notifier.send_cart_reminder(@delivery.delivery_request.buyer)
+				Notifier.send_cart_reminder(@delivery.delivery_request.buyer).deliver_now
 			end
 		end
 
