@@ -27,7 +27,7 @@ class ShopsController < BaseController
 
         rated_users = []
 
-        User.where('rating_average >= ? OR rating_average IS NULL', params[:stars].to_f).each do |user|
+        User.where('rating_average >= ? OR rating_average IS NULL', params[:stars].to_f).where.not(id: current_user.id).each do |user|
           rated_users.push(user.id)
         end
 
@@ -46,7 +46,7 @@ class ShopsController < BaseController
         if (Schedule.exists?(date: @date, schedule: @hours))
 
           @schedule = Schedule.find_by(date: @date, schedule: @hours)
-          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?) AND delivery_id IS NULL", @schedule.id, shop_ids, rated_users)
+          @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?)", @schedule.id, shop_ids, rated_users)
           @availability.each do |availability|
             response.each do |shop|
               if availability.shop_id == shop['id'].to_i

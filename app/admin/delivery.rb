@@ -12,8 +12,8 @@ ActiveAdmin.register Delivery do
 	end
 
 	action_item(:edit) do
-		link_to "Set cancelled", set_cancelled_admin_order_path
-		link_to "Set disabled", set_disabled_admin_order_path
+		link_to "Set cancelled", set_cancelled_admin_delivery_path
+		link_to "Set disabled", set_disabled_admin_delivery_path
 		link_to "Cancel", resource_path
 	end
 
