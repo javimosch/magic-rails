@@ -66,14 +66,21 @@ class DeliveriesController < BaseController
   def confirm
     respond_to do |format|
       if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
-          Delivery.update(@delivery.id, :status => 'completed')
+          @contents = DeliveryContent.where(id_delivery: @delivery.id)
 
-          @delivery = Delivery.find(@delivery.id)
-          meta = meta_from_delivery(@delivery)
+          if @contents.count == 0
+            format.json { render json: { notice: 'EMPTY_CART' }, status: :unprocessable_entity }
+            format.html { render :new }
+          else
+            Delivery.update(@delivery.id, :status => 'completed')
 
-          Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
-          format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
-          format.json { head :no_content }
+            @delivery = Delivery.find(@delivery.id)
+            meta = meta_from_delivery(@delivery)
+
+            Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+            format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+            format.json { head :no_content }
+          end
 
       else
         format.html { render :new }
@@ -150,7 +157,7 @@ class DeliveriesController < BaseController
           if response.code == 200
 
             if !response['d']['TRANS']['HPAY'].nil?
-              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i)
+              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
               Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
               format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
               format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
