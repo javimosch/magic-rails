@@ -7,11 +7,13 @@ ActiveAdmin.register Delivery do
 			f.input :total
 			f.input :commission
 			f.input :shipping_total
+			f.input :delivery_request_id
+			f.input :availability_id
 		end
 		f.actions
 	end
 
-	action_item(:edit) do
+	action_item only: [:edit] do
 		link_to "Set cancelled", set_cancelled_admin_delivery_path
 		link_to "Set disabled", set_disabled_admin_delivery_path
 		link_to "Cancel", resource_path
