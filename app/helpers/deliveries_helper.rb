@@ -40,7 +40,7 @@ module DeliveriesHelper
 
 			#the buyer has not filled his delete_cart or did not receive any response
 			if @delivery && (@delivery.status == 'accepted' || @delivery.status == 'pending')
-				Delivery.update(@delivery.id, :status: 'canceled')
+				Delivery.update(@delivery.id, status: 'canceled')
 			end
 		end
 	end
