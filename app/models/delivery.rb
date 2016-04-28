@@ -1,17 +1,36 @@
 class Delivery < ActiveRecord::Base
+	include DeliveriesHelper
+
 	has_many :delivery_contents, foreign_key: 'id_delivery'
-	has_one :availability, foreign_key: 'id', primary_key: 'availability_id'
+	belongs_to :availability
 	has_one :delivery_request, foreign_key: 'id', primary_key: 'delivery_request_id'
 
 	after_create :generate_validation_code
 	after_create :send_accepted_delivery
+	after_create :create_delayed_jobs
 	before_create :check_duplicate
 
 	before_save :calculate_commission
 	before_save :calculate_shipping_total
 
+
 	def buyer_rating
 		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
+	end
+
+
+	def create_delayed_jobs
+		@schedule = self.delivery_request.schedule
+		from = @schedule.schedule.split('-')[0].to_i
+		@date = @schedule.date + from.hours
+
+		@mail_reminder = @date - 2.hours
+		@sms_reminder = @date - 15.minutes
+		@delete_cart = @date
+
+		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
+		ap Delivery.delay(run_at: @sms_reminder).sms_reminder(self.id)
+		ap Delivery.delay(run_at: @delete_cart).delete_cart(self.id)
 	end
 
 
@@ -49,9 +68,9 @@ class Delivery < ActiveRecord::Base
 			meta[:shop] = response
 		end
 
-		@others = Availability.where('schedule_id = ? AND shop_id = ? AND deliveryman_id != ?', @availability.schedule_id, @availability.shop_id, @availability.deliveryman_id)
+		@others = Availability.where('schedule_id = ? AND shop_id = ? AND deliveryman_id != ? AND delivery_id IS NULL', @availability.schedule_id, @availability.shop_id, @availability.deliveryman_id)
 		@others.each do |other|
-			Notification.find_by(user_id: other.deliveryman_id).update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison n\'est plus disponible')
+			Notification.find_by(user_id: other.deliveryman_id, read: false, mode: 'delivery_request').update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison n\'est plus disponible')
 		end
 
 		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: self.id
