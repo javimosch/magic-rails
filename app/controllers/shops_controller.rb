@@ -43,36 +43,22 @@ class ShopsController < BaseController
           end
         end
 
-        if (Schedule.exists?(date: @date, schedule: @hours))
+        response.each do |shop|
+          shop[:count] = 0
+          @response.push(shop)
+        end
 
+        if (Schedule.exists?(date: @date, schedule: @hours))
           @schedule = Schedule.find_by(date: @date, schedule: @hours)
           @availability = Availability.where("schedule_id = ? AND shop_id IN (?) AND enabled = true AND deliveryman_id IN (?)", @schedule.id, shop_ids, rated_users)
           @availability.each do |availability|
-            response.each do |shop|
-              if availability.shop_id == shop['id'].to_i
-                @response.push(shop)
-              end
+            shop = @response.select {|s| s['id'].to_i == availability.shop_id}.first
+            shop[:count] += 1
             end
           end
-
-          count = Hash.new(0);
-          newResponse = []
-          @response.each do |shop|
-            count[shop['id'].to_i] += 1
-          end
-
-          count.each do |shop_id, v|
-            shop = @response.select {|s| s['id'].to_i == shop_id}.first
-            ap shop
-            shop[:count] = v.to_i
-            newResponse.push(shop)
-          end
-          @response = newResponse
-        end
       else
         @response = response
       end
-
     end
 
   end
