@@ -1,0 +1,11 @@
+<h1>Annulation de livraison</h1>
+
+<p>
+	Bonjour <%= @user.firstname %> <%= @user.lastname %>, une de vos commandes a été annulée !<br>
+
+	<%= @deliveryman.firstname %> <%= @deliveryman.lastname %> ne souhaite plus vous livrer le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+
+	<% if @shop %>
+	dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
+	<% end %>
+</p>
