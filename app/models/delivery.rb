@@ -35,6 +35,25 @@ class Delivery < ActiveRecord::Base
 		ap Delivery.delay(run_at: @cancel_cart).cancel_cart(self.id)
 	end
 
+	def to_meta(is_buyer)
+      meta = {}
+
+      meta[:availability] = availability
+      meta[:delivery_request] = delivery_request
+      meta[:delivery] = self
+      meta[:address] = delivery_request.address
+      meta[:schedule] = delivery_request.schedule
+      meta[:shop] = nil
+
+      if is_buyer
+        meta[:buyer] = delivery_request.buyer
+      else
+        meta[:deliveryman] = availability.deliveryman
+      end
+
+      meta
+  end
+
 
 	private
 

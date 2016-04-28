@@ -1,10 +1,10 @@
 class AvailabilitiesController < BaseController
-  before_action :set_availability, only: [:show, :edit, :update, :destroy]
+  before_action :set_availability, only: [:show, :edit, :update, :destroy, :cancel]
 
   # GET /availabilities
   # GET /availabilities.json
   def index
-    @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id).where('schedules.date >= ?', Time.now.beginning_of_day)
+    @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, enabled: true).where('schedules.date >= ?', Time.now.beginning_of_day)
   end
 
   # GET /availabilities/1
@@ -52,6 +52,33 @@ class AvailabilitiesController < BaseController
       format.json { render :show, status: :created, location: @availability }
     end
   end
+
+  # POST /availabilities/1/cancel
+  # POST /availabilities/1/cancel.json
+  def cancel
+    respond_to do |format|
+      if !@availability.nil? && !@availability.delivery_id.nil?
+        Delivery.update(@availability.delivery_id, :status => 'canceled')
+        Availability.update(@availability.id, :enabled => false)
+
+        @delivery = Delivery.find(@availability.delivery_id)
+        meta = @delivery.to_meta(false)
+
+        Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
+        Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+        format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
+        format.json { head :no_content }
+      elsif !@availability.nil?
+        @availability.destroy
+        format.html { redirect_to availabilities_url, notice: 'Availability was successfully canceled.' }
+        format.json { head :no_content }
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
+      end
+    end
+  end
+
 
   # PATCH/PUT /availabilities/1
   # PATCH/PUT /availabilities/1.json
