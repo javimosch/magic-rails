@@ -11,7 +11,7 @@ module DeliveriesHelper
 
 			#the buyer has not filled his cart
 			if @delivery && @delivery.status == 'accepted'
-				Notifier.send_cart_reminder(@delivery.delivery_request.buyer).deliver_now
+				Notifier.send_cart_reminder(@delivery.delivery_request.buyer, @delivery.delivery_request).deliver_now
 			end
 		end
 
@@ -35,10 +35,10 @@ module DeliveriesHelper
 			end
 		end
 
-		def delete_cart(delivery_id)
+		def cancel_cart(delivery_id)
 			set_delivery(delivery_id)
 
-			#the buyer has not filled his delete_cart or did not receive any response
+			#the buyer has not filled his cart or did not receive any response
 			if @delivery && (@delivery.status == 'accepted' || @delivery.status == 'pending')
 				Delivery.update(@delivery.id, status: 'canceled')
 			end

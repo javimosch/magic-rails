@@ -27,12 +27,12 @@ class Delivery < ActiveRecord::Base
 		@mail_reminder = @date - 2.hours
 		@mail_reminder2 = @date - 1.hours
 		@sms_reminder = @date - 15.minutes
-		@delete_cart = @date
+		@cancel_cart = @date
 
-		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id, delivery_request)
-		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id, delivery_request)
+		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
+		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id)
 		ap Delivery.delay(run_at: @sms_reminder).sms_reminder(self.id)
-		ap Delivery.delay(run_at: @delete_cart).delete_cart(self.id)
+		ap Delivery.delay(run_at: @cancel_cart).cancel_cart(self.id)
 	end
 
 
