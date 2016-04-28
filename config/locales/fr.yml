@@ -4,3 +4,10 @@ fr:
       default: "%d/%m/%Y"
       short: "%d %B %Y"
       long: "%d %B %Y à %H:%M"
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            phone:
+              taken: "Ce numéro de téléphone est déjà utilisé"

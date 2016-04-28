@@ -4,6 +4,7 @@ class User < ActiveRecord::Base
 	devise :database_authenticatable, :registerable,
 	:recoverable, :rememberable, :trackable, :validatable
 	after_create :send_registration_notification
+	validates_uniqueness_of :phone
 
 	has_many :notifications
 	has_one :wallet, dependent: :destroy
