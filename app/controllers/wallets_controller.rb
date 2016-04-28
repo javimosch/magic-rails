@@ -22,22 +22,6 @@ class WalletsController < BaseController
   def edit
   end
 
-  # POST /wallets
-  # POST /wallets.json
-  # def create
-  #   @wallet = Wallet.new(wallet_params)
-
-  #   respond_to do |format|
-  #     if @wallet.save
-  #       format.html { redirect_to @wallet, notice: 'Wallet was successfully created.' }
-  #       format.json { render :show, status: :created, location: @wallet }
-  #     else
-  #       format.html { render :new }
-  #       format.json { render json: @wallet.errors, status: :unprocessable_entity }
-  #     end
-  #   end
-  # end
-
   # PATCH/PUT /wallets/1
   # PATCH/PUT /wallets/1.json
   def update
@@ -70,7 +54,7 @@ class WalletsController < BaseController
 
     if response.code == 200
       if !response['d']['CARD'].nil?
-        @wallet.update(credit_card_display: response['d']['CARD']['EXTRA']['NUM'], lemonway_card_id: response['d']['CARD']['ID'])
+        @wallet.update(credit_card_display: response['d']['CARD']['EXTRA']['NUM'].gsub(/(.{4})(?=.)/, '\1 \2'), lemonway_card_id: response['d']['CARD']['ID'])
         respond_to do |format|
           format.html { redirect_to @wallet, notice: 'Wallet was successfully updated.' }
           format.json { render :show, status: :ok, location: @wallet }
