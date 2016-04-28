@@ -1,0 +1,10 @@
+<h1>Nouvelle demande de livraison</h1>
+
+<p>
+  Bonjour <%= @user.firstname %> <%= @user.lastname %>, une nouvelle demande de livraison est disponible ! <br>
+  <%= @buyer.firstname %> <%= @buyer.lastname %> souhaite être livré le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+
+  <% if @shop %>
+  	dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
+  <% end %>
+</p>
