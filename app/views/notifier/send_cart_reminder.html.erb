@@ -1,5 +1,7 @@
 <h1>Rappel</h1>
 
 <p>
-  Bonjour <%= @user.firstname %> <%= @user.lastname %>, il ne vous reste plus que 2 heures pour terminer votre panier !
+  Bonjour <%= @user.firstname %> <%= @user.lastname %>,<br>
+
+  Vous devez remplir votre panier avant <%= @limit %>, faute de quoi votre commande sera annulée automatiquement.
 </p>

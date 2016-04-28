@@ -12,8 +12,10 @@ class Notifier < ApplicationMailer
     mail to: user.email, subject: "Bienvenue !"
   end
 
-  def send_cart_reminder(user)
+  def send_cart_reminder(user, delivery_request)
     @user = user
+    @schedule = delivery_request.schedule.schedule
+    @limit = @schedule.split('-')[0]
 
     mail to: user.email, subject: "Rappel"
   end
