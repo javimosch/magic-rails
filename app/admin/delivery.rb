@@ -1,5 +1,6 @@
 ActiveAdmin.register Delivery do
 
+	actions :all, :except => [:new, :edit]
 	permit_params :total, :commission, :shipping_total
 
 	form do |f|
