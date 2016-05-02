@@ -38,9 +38,9 @@ ActiveAdmin.register DeliveryRequest do
         f.inputs "Addresse de l'acheteur" do
           f.semantic_fields_for :address_attributes do |address|
             address.input :address
-            address.input :city
-            address.input :zip
             address.input :additional_address
+            address.input :zip
+            address.input :city
           end
         end
       end
