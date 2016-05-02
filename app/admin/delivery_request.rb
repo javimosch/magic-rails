@@ -31,7 +31,7 @@ ActiveAdmin.register DeliveryRequest do
 
   form do |f|
     f.inputs do
-      f.input :buyer_id, label: 'Acheteur'
+      f.input :buyer, label: 'Acheteur'
       f.input :schedule_id, as: :select, collection: Schedule.all.map{ |s| ["#{s.date.strftime('%d/%m/%Y')} #{s.schedule}", s.id] }, label: 'Plage horaire'
       f.input :shop_id, label: 'Identifiant du magasin'
       if f.object.new_record?
