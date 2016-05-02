@@ -3,6 +3,13 @@ ActiveAdmin.register Schedule do
   actions :all, :except => [:edit]
   permit_params :schedule, :date
 
+  index do
+    column :id
+    column :schedule
+    column :date
+    actions
+  end
+
   form do |f|
     f.inputs do
       f.input :date

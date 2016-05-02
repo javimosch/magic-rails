@@ -1,7 +1,17 @@
 ActiveAdmin.register Availability do
 
   permit_params :deliveryman_id, :schedule_id, :shop_id, :enabled
-  
+
+  index do
+    column :id
+    column :deliveryman
+    column :schedule
+    column :shop_id
+    column :enabled
+    column :match
+    actions
+  end
+
   form do |f|
 		f.inputs do
 			f.input :deliveryman, label: 'Livreur'

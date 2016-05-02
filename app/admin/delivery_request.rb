@@ -2,6 +2,33 @@ ActiveAdmin.register DeliveryRequest do
 
   permit_params :buyer_id, :schedule_id, :shop_id, :address_attributes
 
+  index do
+    column :id
+    column :buyer
+    column :schedule
+    column :shop_id
+    column :match
+    actions
+  end
+
+  show do
+		attributes_table do
+      row :id
+      row :buyer
+      row :schedule
+      row :shop_id
+      row :address do |delivery_request|
+        raw("#{delivery_request.address.address} - #{delivery_request.address.additional_address}<br>
+            #{delivery_request.address.zip} #{delivery_request.address.city}")
+      end
+      row :created_at
+      row :updated_at
+      row :match
+      row :delivery
+    end
+    active_admin_comments
+  end
+
   form do |f|
     f.inputs do
       f.input :buyer_id, label: 'Acheteur'
