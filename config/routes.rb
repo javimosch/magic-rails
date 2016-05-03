@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  
+
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
   resources :scores
@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   post '/deliveries/:id/confirm' => 'deliveries#confirm', :defaults => { :format => :json }
   post '/deliveries/:id/cancel' => 'deliveries#cancel', :defaults => { :format => :json }
   post '/availabilities/:id/cancel' => 'availabilities#cancel', :defaults => { :format => :json }
+  post '/delivery_requests/:id/cancel' => 'delivery_requests#cancel', :defaults => { :format => :json }
   get 'products' => 'shops#products', :defaults => { :format => :json }
 
   get 'app' => 'home#index', :defaults => { :format => :html }

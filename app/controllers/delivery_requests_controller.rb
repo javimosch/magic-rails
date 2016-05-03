@@ -1,5 +1,5 @@
 class DeliveryRequestsController < BaseController
-  before_action :set_delivery_request, only: [:show, :edit, :update, :destroy]
+  before_action :set_delivery_request, only: [:show, :edit, :cancel, :update, :destroy]
 
   # GET /delivery_requests
   # GET /delivery_requests.json
@@ -46,7 +46,7 @@ class DeliveryRequestsController < BaseController
             respond_to do |format|
               format.html { redirect_to @delivery_request, notice: 'Delivery request was successfully created.' }
               format.json { render :show, status: :created, location: @delivery_request }
-            end
+            end and return
 
           end
 
@@ -56,8 +56,8 @@ class DeliveryRequestsController < BaseController
 
         respond_to do |format|
           format.html { redirect_to @delivery_request, notice: 'Aucun livreur n\'est disponible pour ce créneau de livraison.' }
-          format.json { render json: {notice: 'Aucun livreur n\'est disponible pour ce créneau de livraison.' } }
-        end
+          format.json { render json: {errors: 'NO_DELIVERYMAN' } }
+        end and return
 
       end
 
@@ -66,10 +66,40 @@ class DeliveryRequestsController < BaseController
       respond_to do |format|
         format.html { render :new }
         format.json { render json: {notice: 'Veuillez rensigner un créneau valide.'}, status: :unprocessable_entity }
-      end
+      end and return
 
     end
 
+  end
+
+  # POST /delivery_requests/1/cancel
+  # POST /delivery_requests/1/cancel.json
+  def cancel
+    respond_to do |format|
+      if !@delivery_request.nil? && !@delivery_request.delivery_id.nil?
+
+        @delivery = Delivery.find(@delivery_request.delivery_id)
+        if @delivery.status != 'done'
+          Delivery.update(@delivery_request.delivery_id, :status => 'canceled')
+
+          @delivery = Delivery.find(@delivery_request.delivery_id)
+          meta = @delivery.to_meta(false)
+
+          Notification.where(user_id: @delivery_request.buyer_id).last.update(read: true)
+          Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'L\'acheteur a annulé la livraison', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          Notifier.send_canceled_delivery_request(@delivery.availability.deliveryman, @delivery).deliver_now
+        end
+        format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
+        format.json { head :no_content }
+      elsif !@delivery_request.nil?
+        @delivery_request.destroy
+        format.html { redirect_to delivery_requests_url, notice: 'Delivery Request was successfully canceled.' }
+        format.json { head :no_content }
+      else
+        format.html { render :new }
+        format.json { render json: {}, status: :unprocessable_entity }
+      end
+    end
   end
 
   # PATCH/PUT /delivery_requests/1
