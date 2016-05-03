@@ -100,6 +100,9 @@ class ShopsController < BaseController
   # GET /shops/1
   # GET /shops/1.json
   def show
+    @response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['id']}/", query: {
+      mct: ENV['MASTERCOURSE_KEY']
+    });
   end
 
   # GET /shops/new
