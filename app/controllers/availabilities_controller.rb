@@ -29,7 +29,7 @@ class AvailabilitiesController < BaseController
       respond_to do |format|
         format.html { render :new }
         format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'} }
-      end
+      end and return
     end
 
     schedules = params[:schedules]
