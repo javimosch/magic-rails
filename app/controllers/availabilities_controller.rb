@@ -83,7 +83,6 @@ class AvailabilitiesController < BaseController
     end
   end
 
-
   # PATCH/PUT /availabilities/1
   # PATCH/PUT /availabilities/1.json
   def update
