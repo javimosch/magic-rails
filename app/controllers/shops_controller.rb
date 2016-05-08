@@ -92,7 +92,7 @@ class ShopsController < BaseController
     @response = []
 
     url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
-    all_products = Rails.cache.fetch(url, expires_in: 30.days) do
+    all_products = Rails.cache.fetch(url, expires_in: 1.days) do
       HTTParty.get(url, query: {
         mct: ENV['MASTERCOURSE_KEY']
       }).parsed_response
@@ -100,9 +100,9 @@ class ShopsController < BaseController
 
     valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
 
-    valid_products.take(8).each do |product|
+    valid_products.take(20).each do |product|
       url = "https://www.mastercourses.com/api2/products/#{product['id']}/"
-      complete_product = Rails.cache.fetch(url, expires_in: 30.days) do
+      complete_product = Rails.cache.fetch(url, expires_in: 1.days) do
         HTTParty.get(url, query: {
           mct: ENV['MASTERCOURSE_KEY']
         }).parsed_response
