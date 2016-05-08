@@ -6,6 +6,22 @@ class ShopsController < BaseController
 
     @response = []
 
+    chains = {}
+    chains['3'] = 'Ooshop'
+    chains['1'] = 'Monoprix'
+    chains['2'] = 'Auchan'
+    chains['7'] = 'Intermarché'
+    chains['8'] = 'Courses U'
+    chains['5'] = 'Simply Market'
+    chains['10'] = 'Auchan'
+    chains['11'] = 'Carrefour'
+    chains['9'] = 'Casino'
+    chains['12'] = 'Leclerc'
+    chains['6'] = 'Amazon Food'
+    chains['13'] = 'Chrono Drive'
+    chains['14'] = 'Cora'
+    chains['15'] = 'Lidl'
+
     if params[:address].present? && !params[:address].blank?
       response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
         mct: ENV['MASTERCOURSE_KEY'],
@@ -19,6 +35,13 @@ class ShopsController < BaseController
         lon: params[:lon],
         number: ENV['SHOPS_NUMBER']
       });
+    end
+
+    # Use chain name instead of shop name
+    response.each do |shop|
+      unless chains[shop['chain_id'].to_s].blank?
+        shop['name'] = chains[shop['chain_id'].to_s]
+      end
     end
 
     if response.code == 200
