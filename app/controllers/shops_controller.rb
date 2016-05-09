@@ -6,6 +6,22 @@ class ShopsController < BaseController
 
     @response = []
 
+    chains = {}
+    chains['3'] = 'Ooshop'
+    chains['1'] = 'Monoprix'
+    chains['2'] = 'Auchan'
+    chains['7'] = 'Intermarché'
+    chains['8'] = 'Courses U'
+    chains['5'] = 'Simply Market'
+    chains['10'] = 'Auchan'
+    chains['11'] = 'Carrefour'
+    chains['9'] = 'Casino'
+    chains['12'] = 'Leclerc'
+    chains['6'] = 'Amazon Food'
+    chains['13'] = 'Chrono Drive'
+    chains['14'] = 'Cora'
+    chains['15'] = 'Lidl'
+
     if params[:address].present? && !params[:address].blank?
       response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
         mct: ENV['MASTERCOURSE_KEY'],
@@ -19,6 +35,13 @@ class ShopsController < BaseController
         lon: params[:lon],
         number: ENV['SHOPS_NUMBER']
       });
+    end
+
+    # Use chain name instead of shop name
+    response.each do |shop|
+      unless chains[shop['chain_id'].to_s].blank?
+        shop['name'] = chains[shop['chain_id'].to_s]
+      end
     end
 
     if response.code == 200
@@ -69,7 +92,7 @@ class ShopsController < BaseController
     @response = []
 
     url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
-    all_products = Rails.cache.fetch(url, expires_in: 30.days) do
+    all_products = Rails.cache.fetch(url, expires_in: 1.days) do
       HTTParty.get(url, query: {
         mct: ENV['MASTERCOURSE_KEY']
       }).parsed_response
@@ -77,9 +100,9 @@ class ShopsController < BaseController
 
     valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
 
-    valid_products.take(8).each do |product|
+    valid_products.take(20).each do |product|
       url = "https://www.mastercourses.com/api2/products/#{product['id']}/"
-      complete_product = Rails.cache.fetch(url, expires_in: 30.days) do
+      complete_product = Rails.cache.fetch(url, expires_in: 1.days) do
         HTTParty.get(url, query: {
           mct: ENV['MASTERCOURSE_KEY']
         }).parsed_response
