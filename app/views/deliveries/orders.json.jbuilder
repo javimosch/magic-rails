@@ -1,5 +1,4 @@
 json.array!(@orders) do |order|
-	json.extract! order, :id
 	json.status 'pending'
 	json.delivery_request order
 	json.buyer order.buyer
