@@ -25,11 +25,11 @@ class AvailabilitiesController < BaseController
   # POST /availabilities.json
   def create
 
-    if (Availability.where("deliveryman_id = ? AND shop_id != ?", params[:deliveryman_id], params[:shop_id]).count > 0)
+    if (Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id]).count > 0, true)
       respond_to do |format|
         format.html { render :new }
         format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'} }
-      end
+      end and return
     end
 
     schedules = params[:schedules]
@@ -82,7 +82,6 @@ class AvailabilitiesController < BaseController
       end
     end
   end
-
 
   # PATCH/PUT /availabilities/1
   # PATCH/PUT /availabilities/1.json
