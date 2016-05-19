@@ -5,12 +5,13 @@ json.array!(@orders) do |order|
 	json.deliveryman nil
 	json.address order.address
 	json.schedule order.schedule
-	response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{order.shop_id}", query: {
-		mct: ENV['MASTERCOURSE_KEY']
-	})
-	if response.code == 200
-		json.shop response
+	shop_url = "https://www.mastercourses.com/api2/stores/#{order.shop_id}"
+	shop = Rails.cache.fetch(shop_url, expires_in: 1.days) do
+		HTTParty.get(shop_url, query: {
+			mct: ENV['MASTERCOURSE_KEY']
+		}).parsed_response
 	end
+	json.shop shop
 	json.url delivery_url(order, format: :json)
 end
 json.array!(@deliveries) do |delivery|
@@ -22,21 +23,23 @@ json.array!(@deliveries) do |delivery|
 	json.availability delivery.availability
 	json.schedule delivery.delivery_request.schedule
 	json.buyer_rating delivery.buyer_rating
-	response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}", query: {
-		mct: ENV['MASTERCOURSE_KEY']
-	})
-	if response.code == 200
-		json.shop response
+	shop_url = "https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}"
+	shop = Rails.cache.fetch(shop_url, expires_in: 1.days) do
+		HTTParty.get(shop_url, query: {
+			mct: ENV['MASTERCOURSE_KEY']
+		}).parsed_response
 	end
+	json.shop shop
 	json.delivery_contents do
 		json.array!(delivery.delivery_contents) do |delivery_content|
 	  	json.extract! delivery_content, :id, :id_delivery, :id_product, :quantity, :unit_price
-			response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}/products/#{delivery_content.id_product}/", query: {
-				mct: ENV['MASTERCOURSE_KEY']
-			});
-			if response.code == 200
-				json.product response
+			product_url = "https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}/products/#{delivery_content.id_product}/"
+			product = Rails.cache.fetch(product_url, expires_in: 1.days) do
+				HTTParty.get(product_url, query: {
+					mct: ENV['MASTERCOURSE_KEY']
+				}).parsed_response
 			end
+			json.product product
 	  end
 	end
 	json.url delivery_url(delivery, format: :json)
