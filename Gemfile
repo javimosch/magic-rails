@@ -44,6 +44,11 @@ gem 'httparty'
 gem 'rpush'
 gem 'activeadmin', '~> 1.0.0.pre2'
 
+gem 'carrierwave'
+gem 'carrierwave-base64'
+gem 'cloudinary'
+gem 'mini_magick'
+
 gem 'sinch_sms'
 
 group :development, :test do

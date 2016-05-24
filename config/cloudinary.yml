@@ -1,0 +1,12 @@
+development:
+  cloud_name: "hxfw95smx"
+  api_key: "656158457313943"
+  api_secret: "_kWImj1sJEjH7RBPk4MQXSr9y4k"
+production:
+  cloud_name: "hxfw95smx"
+  api_key: "656158457313943"
+  api_secret: "_kWImj1sJEjH7RBPk4MQXSr9y4k"
+test:
+  cloud_name: "hxfw95smx"
+  api_key: "656158457313943"
+  api_secret: "_kWImj1sJEjH7RBPk4MQXSr9y4k"
