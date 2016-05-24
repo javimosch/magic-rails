@@ -22,12 +22,14 @@ class Delivery < ActiveRecord::Base
 	def create_delayed_jobs
 		@schedule = self.delivery_request.schedule
 		from = @schedule.schedule.split('-')[0].to_i
-		@date = @schedule.date + from.hours
+		to = @schedule.schedule.split('-')[1].to_i
+		@date_from = @schedule.date + from.hours
+		@date_to = @schedule.date + to.hours
 
-		@mail_reminder = @date - 2.hours
-		@mail_reminder2 = @date - 1.hours
-		@sms_reminder = @date - 15.minutes
-		@cancel_cart = @date
+		@mail_reminder = @date_from - 2.hours
+		@mail_reminder2 = @date_from - 1.hours
+		@sms_reminder = @date_from - 15.minutes
+		@cancel_cart = @date_to - 30.minutes
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
 		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id)

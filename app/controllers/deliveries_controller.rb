@@ -99,7 +99,7 @@ class DeliveriesController < BaseController
           @delivery = Delivery.find(@delivery.id)
           meta = @delivery.to_meta(true)
 
-          Notification.create! mode: 'outdated_delivery', title: 'Commande annulée', content: 'Votre client a annulé sa commande', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+          Notification.create! mode: 'canceled_delivery', title: 'Commande annulée', content: 'Votre client a annulé sa commande', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
           Notifier.send_canceled_delivery_request(@delivery.availability.deliveryman, @delivery).deliver_now
           format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
           format.json { head :no_content }
