@@ -38,14 +38,15 @@ class ShopsController < BaseController
       });
     end
 
-    # Use chain name instead of shop name
-    response.each do |shop|
-      unless chains[shop['chain_id'].to_s].blank?
-        shop['name'] = chains[shop['chain_id'].to_s]
-      end
-    end
-
     if response.code == 200
+
+      # Use chain name instead of shop name
+      response.each do |shop|
+        ap shop
+        unless chains[shop['chain_id'].to_s].blank?
+          shop['name'] = chains[shop['chain_id'].to_s]
+        end
+      end
 
       if params[:schedule].present? && params[:stars].present?
 
