@@ -5,6 +5,7 @@ class Availability < ActiveRecord::Base
 	belongs_to :schedule
 
 	after_create :check_delivery_request
+	attr_accessor :delivery
 
 	private
 

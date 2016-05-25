@@ -5,6 +5,19 @@ class AvailabilitiesController < BaseController
   # GET /availabilities.json
   def index
     @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, enabled: true).where('schedules.date >= ?', Time.now.beginning_of_day)
+
+    ids = []
+    @availabilities.each do |order|
+      ids.push(order.id)
+    end
+
+    @deliveries = Delivery.where(availability_id: ids)
+    @deliveries.each do |delivery|
+      @availability = @availabilities.detect{|w| w.delivery_id == delivery.id}
+      if @availability
+        @availability.delivery = delivery
+      end
+    end
   end
 
   # GET /availabilities/1
@@ -58,20 +71,27 @@ class AvailabilitiesController < BaseController
   def cancel
     respond_to do |format|
       if !@availability.nil? && !@availability.delivery_id.nil?
-        Availability.update(@availability.id, :enabled => false)
-
         @delivery = Delivery.find(@availability.delivery_id)
-        if @delivery.status != 'done'
-          Delivery.update(@availability.delivery_id, :status => 'canceled')
 
-          @delivery = Delivery.find(@availability.delivery_id)
-          meta = @delivery.to_meta(false)
+        if @delivery.status === 'completed'
+            format.html { render :new }
+            format.json { render json: { notice: 'COMPLETED_DELIVERY' }, status: :unprocessable_entity }
+        else
+          Availability.update(@availability.id, :enabled => false)
 
-          Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
-          Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+          if @delivery.status != 'done'
+            Delivery.update(@availability.delivery_id, :status => 'canceled')
+
+            @delivery = Delivery.find(@availability.delivery_id)
+            meta = @delivery.to_meta(false)
+
+            Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
+            Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+          end
+
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
+          format.json { head :no_content }
         end
-        format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
-        format.json { head :no_content }
       elsif !@availability.nil?
         @availability.destroy
         format.html { redirect_to availabilities_url, notice: 'Availability was successfully canceled.' }
