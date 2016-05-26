@@ -80,13 +80,17 @@ class AvailabilitiesController < BaseController
           Availability.update(@availability.id, :enabled => false)
 
           if @delivery.status != 'done'
-            Delivery.update(@availability.delivery_id, :status => 'canceled')
 
             @delivery = Delivery.find(@availability.delivery_id)
             meta = @delivery.to_meta(false)
 
-            Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
-            Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+            if @delivery.status != 'canceled'
+              Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
+              Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+            end
+
+            Delivery.update(@availability.delivery_id, :status => 'canceled')
+
           end
 
           format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
