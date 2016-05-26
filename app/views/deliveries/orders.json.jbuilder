@@ -18,7 +18,7 @@ json.array!(@deliveries) do |delivery|
 	json.extract! delivery, :id, :status, :validation_code, :total, :commission, :shipping_total, :payin_id, :availability_id, :delivery_request_id
 	json.delivery_request delivery.delivery_request
 	json.buyer delivery.delivery_request.buyer
-	json.deliveryman delivery.availability.deliveryman
+	json.deliveryman !delivery.availability.blank? ? delivery.availability.deliveryman : nil
 	json.address delivery.delivery_request.address
 	json.availability delivery.availability
 	json.schedule delivery.delivery_request.schedule
