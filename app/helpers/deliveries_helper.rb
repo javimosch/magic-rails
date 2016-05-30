@@ -39,7 +39,7 @@ module DeliveriesHelper
 			set_delivery(delivery_id)
 
 			#the buyer has not filled his cart or did not receive any response
-			if @delivery && (@delivery.status == 'accepted' || @delivery.status == 'pending')
+			if @delivery
 				Delivery.update(@delivery.id, status: 'canceled')
 			end
 		end
