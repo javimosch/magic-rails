@@ -38,10 +38,11 @@ class AvailabilitiesController < BaseController
   # POST /availabilities.json
   def create
 
-    if (Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id], true).count > 0)
+    availabilities_ids = Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id], true).map { |availability| availability.id }
+    if (Delivery.where(availability_id: availabilities_ids).where(status: ['pending']).count > 0)
       respond_to do |format|
         format.html { render :new }
-        format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'} }
+        format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'}, status: :unprocessable_entity }
       end and return
     end
 
