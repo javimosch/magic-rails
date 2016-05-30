@@ -31,7 +31,7 @@ module DeliveriesHelper
 				meta[:address] = @delivery_request.address
 				meta[:schedule] = @delivery_request.schedule
 				meta[:shop] = nil
-				Notification.create! mode: 'outdated_delivery', title: 'Rappel', content: 'Il ne vous reste plus que 15 minutes pour terminer votre panier !', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
+				Notification.create! mode: 'order_reminder', title: 'Rappel', content: 'Il ne vous reste plus que 15 minutes pour terminer votre panier !', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
 			end
 		end
 
