@@ -26,10 +26,11 @@ class Delivery < ActiveRecord::Base
 		@date_from = @schedule.date + from.hours
 		@date_to = @schedule.date + to.hours
 
-		@mail_reminder = @date_from - 2.hours
-		@mail_reminder2 = @date_from - 1.hours
-		@sms_reminder = @date_to - 45.minutes
+		@mail_reminder = @date_from - 2.hours #1h avant
+		@mail_reminder2 = @date_from - 1.hours #au début du créneau
+		@sms_reminder = @date_from - 15.minutes #1h15 après le début du créneau
 		@cancel_cart = @date_to - 30.minutes
+		#mail au livreur au début du créneau pour lui rappeler qu'il a une commande
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
 		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id)
@@ -109,9 +110,9 @@ class Delivery < ActiveRecord::Base
 			elsif total > 35
 				@commission = Commission.last
 				if @commission.present?
-					self.commission = self.total.ceil / @commission.percentage
+					self.commission = self.total / @commission.percentage
 				else
-					self.commission = self.total.ceil / ENV['COMMISSION_PERCENTAGE'].to_f
+					self.commission = self.total / ENV['COMMISSION_PERCENTAGE'].to_f
 				end
 			end
 
@@ -128,9 +129,9 @@ class Delivery < ActiveRecord::Base
 			elsif total > 35
 				@commission = Commission.last
 				if @commission.present?
-					self.shipping_total = self.total.ceil / @commission.shipping_percentage
+					self.shipping_total = self.total / @commission.shipping_percentage
 				else
-					self.shipping_total = self.total.ceil / ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
+					self.shipping_total = self.total / (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
 				end
 			end
 
