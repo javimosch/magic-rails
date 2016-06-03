@@ -2,7 +2,11 @@ Annulation de livraison
 
 Bonjour <%= @user.firstname %> <%= @user.lastname %>, une de vos commandes a été annulée !
 
-<%= @deliveryman.firstname %> <%= @deliveryman.lastname %> ne souhaite plus vous livrer le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+<% if @timeout %>
+   La commande a été annulée car <%= @deliveryman.firstname %> <%= @deliveryman.lastname %>  n\'est plus disponible pour livrer sur le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+<% else %>
+  <%= @deliveryman.firstname %> <%= @deliveryman.lastname %> ne souhaite plus vous livrer le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+<% end %>
 
 <% if @shop %>
 dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)

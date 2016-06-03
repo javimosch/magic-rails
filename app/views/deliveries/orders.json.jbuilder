@@ -1,5 +1,5 @@
 json.array!(@orders) do |order|
-	json.status 'pending'
+	json.status order.schedule.expired? ? 'canceled' : 'pending'
 	json.delivery_request order
 	json.buyer order.buyer
 	json.deliveryman nil
