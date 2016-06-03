@@ -109,9 +109,9 @@ class Delivery < ActiveRecord::Base
 			elsif total > 35
 				@commission = Commission.last
 				if @commission.present?
-					self.commission = self.total * (@commission.percentage / 100)
+					self.commission = self.total.ceil / @commission.percentage
 				else
-					self.commission = self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100)
+					self.commission = self.total.ceil / ENV['COMMISSION_PERCENTAGE'].to_f
 				end
 			end
 
@@ -128,9 +128,9 @@ class Delivery < ActiveRecord::Base
 			elsif total > 35
 				@commission = Commission.last
 				if @commission.present?
-					self.shipping_total = self.total / @commission.shipping_percentage
+					self.shipping_total = self.total.ceil / @commission.shipping_percentage
 				else
-					self.shipping_total = self.total / ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
+					self.shipping_total = self.total.ceil / ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
 				end
 			end
 
