@@ -29,11 +29,12 @@ class Notifier < ApplicationMailer
     mail to: user.email, subject: "Nouvelle demande de livraison"
   end
 
-  def send_canceled_delivery_request(user, delivery)
+  def send_canceled_delivery_request(user, delivery, timeout = false)
     @user = user
     @buyer = delivery.delivery_request.buyer
     @schedule = delivery.delivery_request.schedule
     @shop = nil
+    @timeout = timeout
     response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{delivery.delivery_request.shop_id}", query: {
       mct: ENV['MASTERCOURSE_KEY']
     })
@@ -44,11 +45,12 @@ class Notifier < ApplicationMailer
     mail to: user.email, subject: "Annulation de commande"
   end
 
-  def send_canceled_delivery_availability(user, delivery)
+  def send_canceled_delivery_availability(user, delivery, timeout = false)
     @user = user
     @deliveryman = delivery.availability.deliveryman
     @schedule = delivery.availability.schedule
     @shop = nil
+    @timeout = timeout
     response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{delivery.delivery_request.shop_id}", query: {
       mct: ENV['MASTERCOURSE_KEY']
     })

@@ -2,8 +2,11 @@ Annulation de commande
 
 Bonjour <%= @user.firstname %> <%= @user.lastname %>, un de vos acheteurs a annulé sa commande !
 
-<%= @buyer.firstname %> <%= @buyer.lastname %> ne souhaite plus être livré le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
-
+<% if @timeout %>
+  La livraison a été annulée car <%= @buyer.firstname %> <%= @buyer.lastname %>  n\'est plus disponible pour le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+<% else %>
+  <%= @buyer.firstname %> <%= @buyer.lastname %> ne souhaite plus être livré le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+<% end %>
 <% if @shop %>
 dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
 <% end %>
