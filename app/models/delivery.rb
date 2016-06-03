@@ -28,7 +28,7 @@ class Delivery < ActiveRecord::Base
 
 		@mail_reminder = @date_from - 2.hours
 		@mail_reminder2 = @date_from - 1.hours
-		@sms_reminder = @date_from - 15.minutes
+		@sms_reminder = @date_to - 45.minutes
 		@cancel_cart = @date_to - 30.minutes
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
