@@ -54,11 +54,11 @@ module DeliveriesHelper
 				meta[:shop] = nil
 
 				# Deliveryman Notifications
-				Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'La livraison a été annulée, l\'acheteur n\'est plus disponible pour ce créneau.', sender: 'push', user_id: @availability.deliveryman_id, meta: meta.to_json, read: false
+				Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'La livraison a été annulée, l\'acheteur n\'a pas validé son panier à temps.', sender: 'push', user_id: @availability.deliveryman_id, meta: meta.to_json, read: false
 				Notifier.send_canceled_delivery_request(@availability.deliveryman, @delivery, true).deliver_now
 
 				# Buyer Notifications
-				Notification.create! mode: 'outdated_delivery', title: 'Commande annulée', content: 'La commande a été annulée, le livreur n\'est plus disponible pour ce créneau.', sender: 'push', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
+				Notification.create! mode: 'outdated_delivery', title: 'Commande annulée', content: 'La commande a été annulée, vous n\'avez pas validé votre panier à temps.', sender: 'push', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false
 				Notifier.send_canceled_delivery_availability(@delivery_request.buyer, @delivery, true).deliver_now
 
 			end
