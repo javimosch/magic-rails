@@ -131,7 +131,7 @@ class Delivery < ActiveRecord::Base
 				if @commission.present?
 					self.shipping_total = self.total / @commission.shipping_percentage
 				else
-					self.shipping_total = self.total / (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
+					self.shipping_total = self.total / ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
 				end
 			end
 
