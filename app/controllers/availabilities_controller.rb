@@ -85,12 +85,14 @@ class AvailabilitiesController < BaseController
             @delivery = Delivery.find(@availability.delivery_id)
             meta = @delivery.to_meta(false)
 
-            if @delivery.status != 'canceled'
-              Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
-              Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
-            end
+            # Finalement, le livreur est quand même tenu de faire sa livraison même si il annule sans dispo
 
-            Delivery.update(@availability.delivery_id, :status => 'canceled')
+            # if @delivery.status != 'canceled'
+            #   Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
+            #   Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+            # end
+            #
+            # Delivery.update(@availability.delivery_id, :status => 'canceled')
 
           end
 
