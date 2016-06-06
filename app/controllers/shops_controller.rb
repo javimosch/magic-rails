@@ -1,27 +1,10 @@
 class ShopsController < BaseController
-
+  include ShopsHelper
   # GET /shops
   # GET /shops.json
   def index
 
     @response = []
-
-    chains = {}
-    chains['3'] = 'Ooshop'
-    chains['1'] = 'Monoprix'
-    chains['2'] = 'Auchan'
-    chains['7'] = 'Intermarché'
-    chains['8'] = 'Courses U'
-    chains['5'] = 'Simply Market'
-    chains['10'] = 'Auchan'
-    chains['11'] = 'Carrefour'
-    chains['4'] = 'Casino'
-    chains['9'] = 'Casino Express'
-    chains['12'] = 'Leclerc'
-    chains['6'] = 'Amazon Food'
-    chains['13'] = 'Chrono Drive'
-    chains['14'] = 'Cora'
-    chains['15'] = 'Lidl'
 
     if params[:address].present? && !params[:address].blank?
       response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
@@ -42,10 +25,7 @@ class ShopsController < BaseController
 
       # Use chain name instead of shop name
       response.each do |shop|
-        ap shop
-        unless chains[shop['chain_id'].to_s].blank?
-          shop['name'] = chains[shop['chain_id'].to_s]
-        end
+        shop['name'] = chain_name(shop['chain_id'].to_s)
       end
 
       if params[:schedule].present? && params[:stars].present?
