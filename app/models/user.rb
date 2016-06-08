@@ -11,6 +11,8 @@ class User < ActiveRecord::Base
 	has_many :ratings
 	has_many :delivery_requests
 
+	mount_base64_uploader :avatar, AvatarUploader
+
 	def name
 		firstname + ' ' + lastname
 	end

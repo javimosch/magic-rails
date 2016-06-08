@@ -14,7 +14,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 			@availabilities = Availability.where(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true).where.not(deliveryman_id: self.buyer_id)
 		if (@availabilities.count > 0)
-			
+
 
 
 			meta = {}
@@ -32,7 +32,7 @@ class DeliveryRequest < ActiveRecord::Base
 
 			@availabilities.each do |availability|
 				meta[:availability] = availability
-				Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible', sender: 'sms', user_id: availability.deliveryman_id, meta: meta.to_json, read: false
+				Notification.create! mode: 'delivery_request', title: 'Nouvelle demande de livraison disponible', content: 'Nouvelle demande de livraison disponible. Attention, vous vous engagez à livrer dans le créneau imparti et vous ne pourrez annuler votre livraison.', sender: 'sms', user_id: availability.deliveryman_id, meta: meta.to_json, read: false
 				Notifier.send_new_delivery(availability.deliveryman, self).deliver_now
 				availability.update(match: true)
 			end

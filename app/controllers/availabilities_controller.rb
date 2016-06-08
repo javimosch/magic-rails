@@ -5,6 +5,19 @@ class AvailabilitiesController < BaseController
   # GET /availabilities.json
   def index
     @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, enabled: true).where('schedules.date >= ?', Time.now.beginning_of_day)
+
+    ids = []
+    @availabilities.each do |order|
+      ids.push(order.id)
+    end
+
+    @deliveries = Delivery.where(availability_id: ids)
+    @deliveries.each do |delivery|
+      @availability = @availabilities.detect{|w| w.delivery_id == delivery.id}
+      if @availability
+        @availability.delivery = delivery
+      end
+    end
   end
 
   # GET /availabilities/1
@@ -25,10 +38,11 @@ class AvailabilitiesController < BaseController
   # POST /availabilities.json
   def create
 
-    if (Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id], true).count > 0)
+    availabilities_ids = Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id], true).map { |availability| availability.id }
+    if (Delivery.where(availability_id: availabilities_ids).where(status: ['pending']).count > 0)
       respond_to do |format|
         format.html { render :new }
-        format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'} }
+        format.json { render json: {notice: 'Vous ne pouvez pas proposer de livraison dans un autre magasin.'}, status: :unprocessable_entity }
       end and return
     end
 
@@ -58,20 +72,33 @@ class AvailabilitiesController < BaseController
   def cancel
     respond_to do |format|
       if !@availability.nil? && !@availability.delivery_id.nil?
-        Availability.update(@availability.id, :enabled => false)
-
         @delivery = Delivery.find(@availability.delivery_id)
-        if @delivery.status != 'done'
-          Delivery.update(@availability.delivery_id, :status => 'canceled')
 
-          @delivery = Delivery.find(@availability.delivery_id)
-          meta = @delivery.to_meta(false)
+        if @delivery.status === 'completed'
+            format.html { render :new }
+            format.json { render json: { notice: 'COMPLETED_DELIVERY' }, status: :unprocessable_entity }
+        else
+          Availability.update(@availability.id, :enabled => false)
 
-          Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
-          Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+          if @delivery.status != 'done'
+
+            @delivery = Delivery.find(@availability.delivery_id)
+            meta = @delivery.to_meta(false)
+
+            # Finalement, le livreur est quand même tenu de faire sa livraison même si il annule sans dispo
+
+            # if @delivery.status != 'canceled'
+            #   Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'Votre livreur a annulé la livraison', sender: 'push', user_id: @delivery.delivery_request.buyer_id, meta: meta.to_json, read: false
+            #   Notifier.send_canceled_delivery_availability(@delivery.delivery_request.buyer, @delivery).deliver_now
+            # end
+            #
+            # Delivery.update(@availability.delivery_id, :status => 'canceled')
+
+          end
+
+          format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
+          format.json { head :no_content }
         end
-        format.html { redirect_to @delivery, notice: 'Delivery was successfully canceled.' }
-        format.json { head :no_content }
       elsif !@availability.nil?
         @availability.destroy
         format.html { redirect_to availabilities_url, notice: 'Availability was successfully canceled.' }

@@ -25,7 +25,9 @@ Rails.application.routes.draw do
   post '/delivery_requests/:id/cancel' => 'delivery_requests#cancel', :defaults => { :format => :json }
   get 'products' => 'shops#products', :defaults => { :format => :json }
 
-  get 'app' => 'home#index', :defaults => { :format => :html }
+  get 'app' => 'home#app', :defaults => { :format => :html }
+
+  root 'home#index'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

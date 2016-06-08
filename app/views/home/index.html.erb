@@ -1,1 +1,19 @@
-<a href="com.shopmycourses://test" id="openApp"></a>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <%= image_tag 'logo.png', class: 'img-responsive' %>
+      <% if notice %>
+        <h2 class="alert alert-success">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only" style="font-size: 14px !important;"> Fermer</span></button>
+          <%= notice %>
+        </h2>
+      <% end %>
+      <% if alert %>
+        <h2 class="alert alert-danger">
+         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only" style="font-size: 14px !important;"> Fermer</span></button>
+          <%= alert %>
+       </h2>
+     <% end %>
+    </div>
+  </div>
+</div>

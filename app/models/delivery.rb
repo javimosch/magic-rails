@@ -22,12 +22,15 @@ class Delivery < ActiveRecord::Base
 	def create_delayed_jobs
 		@schedule = self.delivery_request.schedule
 		from = @schedule.schedule.split('-')[0].to_i
-		@date = @schedule.date + from.hours
+		to = @schedule.schedule.split('-')[1].to_i
+		@date_from = @schedule.date + from.hours
+		@date_to = @schedule.date + to.hours
 
-		@mail_reminder = @date - 2.hours
-		@mail_reminder2 = @date - 1.hours
-		@sms_reminder = @date - 15.minutes
-		@cancel_cart = @date
+		@mail_reminder = @date_from - 2.hours #1h avant
+		@mail_reminder2 = @date_from - 1.hours #au début du créneau
+		@sms_reminder = @date_from - 15.minutes #1h15 après le début du créneau
+		@cancel_cart = @date_to - 30.minutes
+		#mail au livreur au début du créneau pour lui rappeler qu'il a une commande
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
 		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id)
@@ -91,7 +94,7 @@ class Delivery < ActiveRecord::Base
 
 		@others = Availability.where('schedule_id = ? AND shop_id = ? AND deliveryman_id != ? AND delivery_id IS NULL', @availability.schedule_id, @availability.shop_id, @availability.deliveryman_id)
 		@others.each do |other|
-			Notification.find_by(user_id: other.deliveryman_id, read: false, mode: 'delivery_request').update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison n\'est plus disponible')
+			Notification.find_by(user_id: other.deliveryman_id, read: false, mode: 'delivery_request').update(mode: 'outdated_delivery', title: 'Cette livraison n\'est plus disponible', content: 'Cette livraison a été acceptée par un autre livreur')
 		end
 
 		Notification.create! mode: 'accepted_delivery', title: 'La demande a été acceptée par un livreur', content: 'La demande a été acceptée par un livreur', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: self.id
@@ -99,25 +102,41 @@ class Delivery < ActiveRecord::Base
 	end
 
 	def calculate_commission
+
 		if !total.nil?
-			@commission = Commission.last
-			if @commission.present?
-				self.commission = self.total * (@commission.percentage / 100)
-			else
-				self.commission = self.total * (ENV['COMMISSION_PERCENTAGE'].to_f / 100)
+
+			if total <= 35
+				self.commission = 3.50
+			elsif total > 35
+				@commission = Commission.last
+				if @commission.present?
+					self.commission = self.total * @commission.percentage
+				else
+					self.commission = self.total * ENV['COMMISSION_PERCENTAGE'].to_f
+				end
 			end
+
 		end
+
 	end
 
 	def calculate_shipping_total
+
 		if !total.nil?
-			@commission = Commission.last
-			if @commission.present?
-				self.shipping_total = self.total * (@commission.shipping_percentage / 100)
-			else
-				self.shipping_total = self.total * (ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f / 100)
+
+			if total <= 35
+				self.shipping_total = 3
+			elsif total > 35
+				@commission = Commission.last
+				if @commission.present?
+					self.shipping_total = self.total * @commission.shipping_percentage
+				else
+					self.shipping_total = self.total * ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
+				end
 			end
+
 		end
+
 	end
 
 end
