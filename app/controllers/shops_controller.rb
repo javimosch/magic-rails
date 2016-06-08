@@ -95,7 +95,8 @@ class ShopsController < BaseController
 
   def includes_strings?(words, haystack)
     words.downcase.split(' ').each do |word|
-      unless haystack.downcase.include? word
+      haystack = ActiveSupport::Inflector.transliterate(haystack)
+      unless haystack.downcase.include? ActiveSupport::Inflector.transliterate(word)
         return false
       end
     end
