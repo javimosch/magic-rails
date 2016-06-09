@@ -119,7 +119,7 @@ class DeliveriesController < BaseController
 
     respond_to do |format|
 
-      # Le livreur entre le code et note le livré
+      # Le livreur entre le code et note l'acheteur
       if Delivery.exists?(id: params[:id], validation_code: params[:validation_code], status: 'completed') && current_user.id == @delivery.availability.deliveryman_id
 
         @wallet = @delivery.delivery_request.buyer.wallet
@@ -160,6 +160,7 @@ class DeliveriesController < BaseController
             if !response['d']['TRANS']['HPAY'].nil?
               Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
               Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
+              @delivery.availability.update(enabled: false)
               format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
               format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
             elsif !response['d']['E'].nil?
