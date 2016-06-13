@@ -26,9 +26,9 @@ class Delivery < ActiveRecord::Base
 		@date_from = @schedule.date + from.hours
 		@date_to = @schedule.date + to.hours
 
-		@mail_reminder = @date_from - 2.hours #1h avant
-		@mail_reminder2 = @date_from - 1.hours #au début du créneau
-		@sms_reminder = @date_from - 15.minutes #1h15 après le début du créneau
+		@mail_reminder = @date_from - 1.hours #1h avant
+		@mail_reminder2 = @date_from #au début du créneau
+		@sms_reminder = @date_from - 45.minutes #1h15 après le début du créneau
 		@cancel_cart = @date_to - 30.minutes
 		#mail au livreur au début du créneau pour lui rappeler qu'il a une commande
 
