@@ -1,1 +1,8 @@
-Bonjour <%= @user.firstname %> <%= @user.lastname %>, il ne vous reste plus que 2 heures pour terminer votre panier !
+Bonjour <%= @user.firstname %> <%= @user.lastname %>,
+
+Vous devez valider votre panier et payer en carte bleue au moins 30 minutes
+avant la fin du créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> de <%= @schedule.schedule.gsub('-','à') %>
+<% if @shop %>
+  correspondant au magasin <%= @shop["name"] %> (<%= @shop["address"] %>),
+<% end %>
+faute de quoi votre commande sera annulée automatiquement.
