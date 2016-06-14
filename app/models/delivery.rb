@@ -30,6 +30,7 @@ class Delivery < ActiveRecord::Base
 		@mail_reminder2 = @date_from - 1.hours #au début du créneau
 		@sms_reminder = @date_from - 15.minutes #1h15 après le début du créneau
 		@cancel_cart = @date_to - 30.minutes
+
 		#mail au livreur au début du créneau pour lui rappeler qu'il a une commande
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
