@@ -87,7 +87,7 @@ class DeliveryRequestsController < BaseController
 
           if @delivery.status != 'canceled'
             Notification.where(user_id: @delivery_request.buyer_id).last.update(read: true)
-            Notification.create! mode: 'outdated_delivery', title: 'Livraison annulée', content: 'L\'acheteur a annulé la livraison', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+            Notification.create! mode: 'canceled_delivery', title: 'Livraison annulée', content: 'L\'acheteur a annulé la livraison', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
             Notifier.send_canceled_delivery_request(@delivery.availability.deliveryman, @delivery).deliver_now
           end
 
