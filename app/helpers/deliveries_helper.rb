@@ -22,6 +22,7 @@ module DeliveriesHelper
 			if @delivery && @delivery.status == 'accepted'
 				@availability = @delivery.availability
 				@delivery_request = @delivery.delivery_request
+				@buyer = @delivery_request.buyer
 
 				meta = {}
 				meta[:delivery] = @delivery
@@ -31,7 +32,7 @@ module DeliveriesHelper
 				meta[:address] = @delivery_request.address
 				meta[:schedule] = @delivery_request.schedule
 				meta[:shop] = nil
-				Notification.create! mode: 'order_reminder', title: 'Rappel', content: 'Il vous reste 15 minutes pour valider votre panier et payer en CB sur l\'application Shopmycourses !', sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
+				Notification.create! mode: 'order_reminder', title: 'Rappel', content: "Bonjour #{@buyer.firstname} #{@buyer.lastname}, il vous reste 15 minutes pour valider votre panier et payer en CB sur l'application Shopmycourses !", sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
 			end
 		end
 
