@@ -1,12 +1,12 @@
-Annulation de commande
-
-Bonjour <%= @user.firstname %> <%= @user.lastname %>, un de vos acheteurs a annulé sa commande !
+Bonjour <%= @user.firstname %> <%= @user.lastname %>,
 
 <% if @timeout %>
-  La livraison a été annulée car <%= @buyer.firstname %> <%= @buyer.lastname %>  n\'est plus disponible pour le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
+  Une de vos livraisons a été annulée car le demandeur <%= @buyer.firstname %> <%= @buyer.lastname %>
+  n'a pas validé son panier et payé en CB 30 minutes avant la fin du créneau du
+  <%= @schedule.date.strftime('%d/%m/%Y') %> de <%= @schedule.schedule.gsub('-', 'à') %>
 <% else %>
   <%= @buyer.firstname %> <%= @buyer.lastname %> ne souhaite plus être livré le <%= @schedule.date.strftime('%d/%m/%Y') %> à <%= @schedule.schedule %>
 <% end %>
 <% if @shop %>
-dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
+  correspondant au magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
 <% end %>

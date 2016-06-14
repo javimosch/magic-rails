@@ -1,4 +1,14 @@
-<h1>Nouvelle demande de livraison</h1>
+<p>
+  Bonjour <%= @user.firstname %> <%= @user.lastname %>,<br>
+
+  Vous devez livrer <%= @buyer.firstname %> <%= @buyer.lastname %> pendant le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> de <%= @schedule.schedule.gsub('-','à') %>
+
+  <% if @shop %>
+    correspondant au magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
+  <% end %>
+</p>
+
+<!-- <h1>Nouvelle demande de livraison</h1>
 
 <p>
   Bonjour <%= @user.firstname %> <%= @user.lastname %>, une nouvelle demande de livraison est disponible ! <br>
@@ -8,4 +18,4 @@
   <% if @shop %>
   	dans le magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
   <% end %>
-</p>
+</p> -->
