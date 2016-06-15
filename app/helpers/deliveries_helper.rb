@@ -32,7 +32,7 @@ module DeliveriesHelper
 				meta[:address] = @delivery_request.address
 				meta[:schedule] = @delivery_request.schedule
 				meta[:shop] = nil
-				Notification.create! mode: 'order_reminder', title: 'Rappel', content: "Bonjour #{@buyer.firstname} #{@buyer.lastname}, il vous reste 15 minutes pour valider votre panier et payer en CB sur l'application Shopmycourses !", sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
+				Notification.create! mode: 'order_reminder', title: "Bonjour #{@buyer.firstname} #{@buyer.lastname}, il vous reste 15 minutes pour valider votre panier et payer en CB sur l'application Shopmycourses !", content: "Bonjour #{@buyer.firstname} #{@buyer.lastname}, il vous reste 15 minutes pour valider votre panier et payer en CB sur l'application Shopmycourses !", sender: 'sms', user_id: @delivery_request.buyer_id, meta: meta.to_json, read: false, delivery_id: @delivery.id
 			end
 		end
 
