@@ -12,7 +12,7 @@ class Notification < ActiveRecord::Base
 	    	ap 'Send email'
 	    elsif self.sender == 'push'
 	    	ap 'Send push'
-	    elsif self.sender == 'sms'
+	    elsif self.sender == 'sms' || self.sender == 'onlysms'
 				ap "Send sms to #{self.user.phone}"
         sms = "#{self.title}\nRendez-vous sur l'appli: http://goo.gl/HHnGdx"
 				phone = PhonyRails.normalize_number(self.user.phone, country_code: 'FR')
