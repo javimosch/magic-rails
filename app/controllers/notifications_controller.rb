@@ -4,7 +4,7 @@ class NotificationsController < BaseController
   # GET /notifications
   # GET /notifications.json
   def index
-    @notifications = Notification.where(user_id: current_user.id, read: false, sender: 'push')
+    @notifications = Notification.where(user_id: current_user.id, read: false, sender: ['push', 'sms'])
   end
 
   # GET /notifications/1
