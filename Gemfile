@@ -49,7 +49,7 @@ gem 'carrierwave'
 gem 'carrierwave-base64'
 gem 'cloudinary'
 gem 'mini_magick'
-
+gem 'phony_rails'
 gem 'sinch_sms'
 
 group :development, :test do
