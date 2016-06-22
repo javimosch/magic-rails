@@ -14,7 +14,7 @@ class Notification < ActiveRecord::Base
 	    	ap 'Send push'
 	    elsif self.sender == 'sms' || self.sender == 'onlysms'
 				ap "Send sms to #{self.user.phone}"
-        sms = "#{self.title}\nRendez-vous sur l'appli: http://goo.gl/VPv3ZH"
+        sms = "#{self.title}\nRendez-vous sur l'appli: http://goo.gl/VPv3ZH\nShopmycourses."
 				phone = PhonyRails.normalize_number(self.user.phone, country_code: 'FR')
 				result = HTTParty.post(ENV['OCTOPUSH_URL'], body: {
 					user_login: ENV['OCTOPUSH_LOGIN'],
@@ -22,7 +22,7 @@ class Notification < ActiveRecord::Base
 					sms_recipients: phone,
 					sms_text: sms,
 					sms_type: ENV['OCTOPUSH_TYPE'],
-					sms_sender: 'SMC',
+					sms_sender: 'SMC App',
 					transactional: 1
 				})
 				ap "OCTOPUSH RESULT :"
