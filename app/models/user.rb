@@ -9,7 +9,7 @@ class User < ActiveRecord::Base
 	has_many :notifications
 	has_one :wallet, dependent: :destroy
 	has_many :ratings
-	has_many :delivery_requests
+	has_many :delivery_requests, foreign_key: :buyer_id
 
 	mount_base64_uploader :avatar, AvatarUploader
 
