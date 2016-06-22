@@ -40,7 +40,7 @@ module DeliveriesHelper
 			set_delivery(delivery_id)
 
 			#the buyer has not filled his cart or did not receive any response
-			if @delivery
+			if @delivery && @delivery.status == 'accepted'
 				Delivery.update(@delivery.id, status: 'canceled')
 
 				@availability = @delivery.availability
