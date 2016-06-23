@@ -77,7 +77,7 @@ class DeliveriesController < BaseController
             @delivery = Delivery.find(@delivery.id)
             meta = @delivery.to_meta(true)
 
-            Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'push', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+            Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'sms', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
             format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
             format.json { head :no_content }
           end
