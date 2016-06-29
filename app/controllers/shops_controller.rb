@@ -81,6 +81,13 @@ class ShopsController < BaseController
       }).parsed_response
     end
 
+    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
+    all_products = Rails.cache.fetch(url, expires_in: 1.days) do
+      HTTParty.get(url, query: {
+        mct: ENV['MASTERCOURSE_KEY']
+      }).parsed_response
+    end
+
     url = "https://www.mastercourses.com/api2/chains/#{shop['chain_id']}/products/search/"
     searched_products = HTTParty.get(url, query: {
       mct: ENV['MASTERCOURSE_KEY'],
@@ -92,19 +99,52 @@ class ShopsController < BaseController
       limit = ENV['PRODUCT_SEARCH_LIMIT'].to_i
       searched_products.each do |searched|
         if counter < limit
-          url = "https://www.mastercourses.com/api2/stores/#{shop['id']}/products/#{searched['id']}/"
-          product = Rails.cache.fetch(url, expires_in: 1.days) do
-            HTTParty.get(url, query: {
-              mct: ENV['MASTERCOURSE_KEY']
-            }).parsed_response
-          end
-          if product['available'] and product['price']
+          selectioned = all_products.select { |selection| selection.id == searched['id'] and selection['available'] and selection['price'] }
+          if selectioned.present?
+            url = "https://www.mastercourses.com/api2/stores/#{shop['id']}/products/#{selectioned['id']}/"
+            product = Rails.cache.fetch(url, expires_in: 1.days) do
+              HTTParty.get(url, query: {
+                mct: ENV['MASTERCOURSE_KEY']
+              }).parsed_response
+            end
             @response << product
             counter += 1
           end
         end
       end
     end
+
+    # url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/"
+    # shop = Rails.cache.fetch(url, expires_in: 1.days) do
+    #   HTTParty.get(url, query: {
+    #     mct: ENV['MASTERCOURSE_KEY']
+    #   }).parsed_response
+    # end
+    #
+    # url = "https://www.mastercourses.com/api2/chains/#{shop['chain_id']}/products/search/"
+    # searched_products = HTTParty.get(url, query: {
+    #   mct: ENV['MASTERCOURSE_KEY'],
+    #   q: params['q']
+    # })
+    #
+    # if searched_products.code == 200
+    #   counter = 0
+    #   limit = ENV['PRODUCT_SEARCH_LIMIT'].to_i
+    #   searched_products.each do |searched|
+    #     if counter < limit
+    #       url = "https://www.mastercourses.com/api2/stores/#{shop['id']}/products/#{searched['id']}/"
+    #       product = Rails.cache.fetch(url, expires_in: 1.days) do
+    #         HTTParty.get(url, query: {
+    #           mct: ENV['MASTERCOURSE_KEY']
+    #         }).parsed_response
+    #       end
+    #       if product['available'] and product['price']
+    #         @response << product
+    #         counter += 1
+    #       end
+    #     end
+    #   end
+    # end
 
   end
 
