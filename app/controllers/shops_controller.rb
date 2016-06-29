@@ -99,7 +99,7 @@ class ShopsController < BaseController
       limit = ENV['PRODUCT_SEARCH_LIMIT'].to_i
       searched_products.each do |searched|
         if counter < limit
-          selectioned = all_products.select { |selection| selection['id'] == searched['id'] and selection['available'] and selection['price'] }
+          selectioned = all_products.select { |selection| selection['id'] == searched['id'] and selection['available'] and selection['price'] }.first
           if selectioned.present?
             url = "https://www.mastercourses.com/api2/stores/#{shop['id']}/products/#{selectioned['id']}/"
             product = Rails.cache.fetch(url, expires_in: 1.days) do
