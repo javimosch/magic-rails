@@ -3,7 +3,7 @@ class Notifier < ApplicationMailer
   def send_registration(user)
     @user = user
 
-    mail to: user.email, subject: "Bienvenue !"
+    mail to: user.email, subject: "Bienvenue dans l'aventure Shopmycourses !"
   end
 
   def send_cart_reminder(user, delivery_request)
