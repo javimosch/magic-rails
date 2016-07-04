@@ -74,36 +74,23 @@ class ShopsController < BaseController
 
     @response = []
 
-    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/"
-    shop = Rails.cache.fetch(url, expires_in: 1.days) do
+    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
+    all_products = Rails.cache.fetch(url, expires_in: 1.days) do
       HTTParty.get(url, query: {
         mct: ENV['MASTERCOURSE_KEY']
       }).parsed_response
     end
 
-    url = "https://www.mastercourses.com/api2/chains/#{shop['chain_id']}/products/search/"
-    searched_products = HTTParty.get(url, query: {
-      mct: ENV['MASTERCOURSE_KEY'],
-      q: params['q']
-    })
+    valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
 
-    if searched_products.code == 200
-      counter = 0
-      limit = ENV['PRODUCT_SEARCH_LIMIT'].to_i
-      searched_products.each do |searched|
-        if counter < limit
-          url = "https://www.mastercourses.com/api2/stores/#{shop['id']}/products/#{searched['id']}/"
-          product = Rails.cache.fetch(url, expires_in: 1.days) do
-            HTTParty.get(url, query: {
-              mct: ENV['MASTERCOURSE_KEY']
-            }).parsed_response
-          end
-          if product['available'] and product['price']
-            @response << product
-            counter += 1
-          end
-        end
+    valid_products.take(20).each do |product|
+      url = "https://www.mastercourses.com/api2/products/#{product['id']}/"
+      complete_product = Rails.cache.fetch(url, expires_in: 1.days) do
+        HTTParty.get(url, query: {
+          mct: ENV['MASTERCOURSE_KEY']
+        }).parsed_response
       end
+      @response << complete_product.merge(product)
     end
 
   end
