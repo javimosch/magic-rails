@@ -65,7 +65,7 @@ class DeliveriesController < BaseController
   # POST /deliveries/1/confirm.json
   def confirm
     respond_to do |format|
-      if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
+      if !@delivery.nil? and (current_user.id == @delivery.delivery_request.buyer_id) and (@delivery.status != 'canceled')
           @contents = DeliveryContent.where(id_delivery: @delivery.id)
 
           if @contents.count == 0
@@ -83,7 +83,7 @@ class DeliveriesController < BaseController
           end
 
       else
-        format.html { render :new }
+        format.html { render json: {error: 'TOO_LATE'}, status: :unprocessable_entity }
         format.json { render json: {}, status: :unprocessable_entity }
       end
     end
