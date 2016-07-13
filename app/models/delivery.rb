@@ -10,8 +10,8 @@ class Delivery < ActiveRecord::Base
 	after_create :create_delayed_jobs
 	before_create :check_duplicate
 
-	before_save :calculate_commission
-	before_save :calculate_shipping_total
+	before_update :calculate_commission
+	before_update :calculate_shipping_total
 
 
 	def buyer_rating
@@ -103,6 +103,9 @@ class Delivery < ActiveRecord::Base
 	end
 
 	def calculate_commission
+
+		ap "******"
+		ap total
 
 		if !total.nil?
 

@@ -223,10 +223,10 @@ class DeliveriesController < BaseController
       total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    Delivery.update(@delivery.id, :total => total)
+    #Delivery.update(@delivery.id, :total => total)
 
     respond_to do |format|
-      if @delivery.update(delivery_params)
+      if @delivery.update(total: total)
         format.html { redirect_to @delivery, notice: 'Delivery was successfully updated.' }
         format.json { render :show, status: :ok, location: @delivery }
       else
