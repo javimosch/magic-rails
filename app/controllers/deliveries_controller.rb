@@ -143,7 +143,7 @@ class DeliveriesController < BaseController
               walletUa: 'ruby/rails',
               wallet: @wallet.lemonway_id,
               cardId: @wallet.lemonway_card_id,
-              amountTot: '%.2f' % @delivery.total,
+              amountTot: '%.2f' % (@delivery.total + @delivery.shipping_total),
               amountCom: '%.2f' % @delivery.commission,
               comment: @delivery.status,
               message: @delivery.status,
