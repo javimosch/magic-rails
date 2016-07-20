@@ -5,25 +5,25 @@ class DeliveriesController < BaseController
   # GET /deliveries.json
   def index
 
-    @availabilities = Availability.where(deliveryman_id: current_user.id)
+    @availabilities = Availability.where(deliveryman_id: current_user.id).order(created_at: :desc)
     ids = []
     @availabilities.each do |order|
       ids.push(order.id)
     end
-    @deliveries = Delivery.where(availability_id: ids)
+    @deliveries = Delivery.where(availability_id: ids).order(created_at: :desc)
   end
 
   # GET /orders
   # GET /orders.json
   def orders
 
-    @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true)
+    @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true).order(created_at: :desc)
     @deliveries = DeliveryRequest.where(buyer_id: current_user.id, match: true)
     ids = []
     @deliveries.each do |delivery|
       ids.push(delivery.id)
     end
-    @deliveries = Delivery.where(delivery_request_id: ids)
+    @deliveries = Delivery.where(delivery_request_id: ids).order(created_at: :desc)
 
   end
 
