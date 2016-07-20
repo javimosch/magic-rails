@@ -1,11 +1,13 @@
 <p>
   Bonjour <%= @user.firstname %> <%= @user.lastname %>,<br>
 
-  Vous devez livrer <%= @buyer.firstname %> <%= @buyer.lastname %> pendant le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> de <%= @schedule.schedule.gsub('-','à') %>
+  Vous pouvez livrer <%= @buyer.firstname %> <%= @buyer.lastname %> pendant le créneau du <%= @schedule.date.strftime('%d/%m/%Y') %> de <%= @schedule.schedule.gsub('-','à') %>
 
   <% if @shop %>
     correspondant au magasin <%= @shop["name"] %> (<%= @shop["address"] %>)
   <% end %>
+  <br>
+  Allez sur l'application Shopmycourses pour accepter cette livraison.
 </p>
 
 <!-- <h1>Nouvelle demande de livraison</h1>
