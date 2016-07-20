@@ -33,7 +33,7 @@ class Notifier < ApplicationMailer
       @shop = JSON.parse(response.body)
     end
 
-    mail to: user.email, subject: "Rappel de livraison Shopmycourses"
+    mail to: user.email, subject: "Demande de livraison"
   end
 
   def send_canceled_delivery_request(user, delivery, timeout = false)
