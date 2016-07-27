@@ -8,6 +8,9 @@ class BaseController < ActionController::Base
   def create_user_from_params(params)
         @user = User.new(params)
         if @user.save && @user.errors.present? == false
+            @user.avatar.recreate_versions!
+            @user.save!
+
             @auth_token = jwt_token(@user, params[:password])
             @wallet = Wallet.create! user_id: @user.id
             if @wallet.errors.present?
@@ -20,6 +23,15 @@ class BaseController < ActionController::Base
             render json: {errors: @user.errors.messages}, status: 422
         end
     end
+
+  def get_avatar_from_url(url)
+    response = HTTParty.get(url)
+    if response.code === 200
+      'data:image/jpg;base64,' + Base64.encode64(response.body)
+    else
+      ''
+    end
+  end
 
   def cors_set_access_control_headers
     headers['Access-Control-Allow-Origin'] = '*'

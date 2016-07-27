@@ -31,6 +31,7 @@ class SessionsController < BaseController
           params[:email] = response['email']
           params[:firstname] = response['first_name']
           params[:lastname] = response['last_name']
+          params[:avatar] = get_avatar_from_url(response['picture']['data']['url'])
           create_user_from_params(user_params)
         end
 
@@ -72,7 +73,8 @@ class SessionsController < BaseController
           params[:email] = response['email']
           params[:firstname] = response['given_name']
           params[:lastname] = response['family_name']
-          create_user_from_params(user_params)
+          params[:avatar] = get_avatar_from_url(response['picture'])
+          create_user_from_params(user_create_params)
         end
 
       else
@@ -86,6 +88,10 @@ class SessionsController < BaseController
 
   def user_params
     params.permit(:email, :password, :auth_token, :auth_method)
+  end
+
+  def user_create_params
+    params.permit(:email, :password, :auth_token, :auth_method, :firstname, :lastname, :avatar)
   end
 
   def ensure_params_exist
