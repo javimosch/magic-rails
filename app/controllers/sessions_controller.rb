@@ -14,7 +14,7 @@ class SessionsController < BaseController
 
     elsif user_params[:auth_method] === 'facebook'
 
-      response = HTTParty.get('https://graph.facebook.com/me?fields=email,first_name,last_name,gender&access_token=' + user_params[:auth_token])
+      response = HTTParty.get('https://graph.facebook.com/me?fields=email,first_name,last_name,gender,picture&access_token=' + user_params[:auth_token])
 
       ap response
       if response.code === 200
@@ -32,7 +32,7 @@ class SessionsController < BaseController
           params[:firstname] = response['first_name']
           params[:lastname] = response['last_name']
           params[:avatar] = get_avatar_from_url(response['picture']['data']['url'])
-          create_user_from_params(user_params)
+          create_user_from_params(user_create_params)
         end
 
       else
