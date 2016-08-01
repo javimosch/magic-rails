@@ -110,7 +110,7 @@ class Delivery < ActiveRecord::Base
 		if !total.nil?
 
 			if total <= 35
-				self.commission = 3.50
+				self.commission = 3.60
 			elsif total > 35
 				@commission = Commission.last
 				if @commission.present?
