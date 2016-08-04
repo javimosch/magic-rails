@@ -24,6 +24,29 @@ class BaseController < ActionController::Base
         end
     end
 
+  def check_google_token_from_params(params)
+    server_auth_code = params[:auth_token]
+    refresh_token = params[:refresh_token]
+
+    if !refresh_token.nil?
+      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
+                                body: {
+                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
+                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
+                                    grant_type: 'refresh_token',
+                                    refresh_token: params[:refresh_token]
+                                  })
+    else
+      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
+                                body: {
+                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
+                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
+                                    grant_type: 'authorization_code',
+                                    code: server_auth_code
+                                  })
+    end
+  end
+
   def get_avatar_from_url(url)
     response = HTTParty.get(url)
     if response.code === 200

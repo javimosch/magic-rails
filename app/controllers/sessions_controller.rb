@@ -41,14 +41,7 @@ class SessionsController < BaseController
 
     elsif user_params[:auth_method] === 'google'
 
-      server_auth_code = params[:auth_token]
-      response = HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
-                                body: {
-                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
-                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
-                                    grant_type: 'authorization_code',
-                                    code: server_auth_code
-                                  })
+      response = check_google_token_from_params(params)
 
       if response.code != 200
         render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
@@ -87,7 +80,7 @@ class SessionsController < BaseController
   private
 
   def user_params
-    params.permit(:email, :password, :auth_token, :auth_method)
+    params.permit(:email, :password, :auth_token, :auth_method, :refresh_token)
   end
 
   def user_create_params
