@@ -3,28 +3,73 @@ class RegistrationsController < BaseController
 	skip_before_filter :authenticate_user_from_token!, only: [:create]
 	respond_to :json
 
-	def create
-		if (User.find_by(email: user_params['email']))
-			render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
-		else
-			@user = User.new(user_params)
-			if @user.save
-				@auth_token = jwt_token(@user, user_params['password'])
-				@wallet = Wallet.create! user_id: @user.id
-				if @wallet.errors.present?
-					render json: {errors: @user.errors.messages}, status: 422
-				else
-					@user.update({wallet_id: @wallet.id})
-				end
+    def create
+        if user_params[:auth_method] === 'email'
+            if (User.find_by(email: user_params['email']))
+                render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
+            else
+                create_user_from_params(user_params)
 			end
-			if @user.errors.present?
-				render json: {errors: @user.errors.messages}, status: 422
-			else
-				user = @user.as_json
-				user[:wallet] = @wallet
-				render json: {token: @auth_token, user: user}, status: 201
-			end
-		end
+
+	    elsif user_params[:auth_method] === 'facebook'
+
+	      response = HTTParty.get('https://graph.facebook.com/me?fields=email,first_name,last_name,gender,picture&access_token=' + user_params[:auth_token])
+
+	      if response.code === 200
+					response = JSON.parse(response.body)
+	        @user = User.find_by(email: response['email'])
+
+	        if @user
+						render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
+	        else
+	          password = ('0'..'z').to_a.shuffle.first(8).join
+	          params[:password] = password
+	          params[:email] = response['email']
+            params[:firstname] = response['first_name']
+            params[:lastname] = response['last_name']
+            params[:avatar] = get_avatar_from_url(response['picture']['data']['url'])
+	          create_user_from_params(user_params)
+	        end
+
+	      else
+	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Facebook.'}, status: 422
+	      end
+
+	    elsif user_params[:auth_method] === 'google'
+
+			response = check_google_token_from_params(params)
+
+	      if response.code != 200
+	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
+	        return
+	      end
+
+        response = JSON.parse(response.body)
+	      access_token = response['access_token']
+	      response = HTTParty.get('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' + access_token)
+
+	      if response.code === 200
+
+					response = JSON.parse(response.body)
+	        @user = User.find_by(email: response['email'])
+
+	        if @user
+						render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
+	        else
+	          password = ('0'..'z').to_a.shuffle.first(8).join
+            params[:password] = password
+            params[:email] = response['email']
+            params[:firstname] = response['given_name']
+            params[:lastname] = response['family_name']
+            params[:avatar] = get_avatar_from_url(response['picture'])
+            create_user_from_params(user_params)
+	        end
+
+	      else
+	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
+	      end
+	    end
+
 	end
 
 	def update
@@ -43,7 +88,7 @@ class RegistrationsController < BaseController
 	private
 
 	def user_params
-		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :wallet_id)
+		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :refresh_token, :wallet_id)
 	end
 
 end

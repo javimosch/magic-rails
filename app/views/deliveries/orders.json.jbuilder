@@ -9,7 +9,7 @@ json.array!(@orders) do |order|
 	json.url delivery_url(order, format: :json)
 end
 json.array!(@deliveries) do |delivery|
-	json.extract! delivery, :id, :status, :validation_code, :total, :commission, :shipping_total, :payin_id, :availability_id, :delivery_request_id
+	json.extract! delivery, :id, :status, :validation_code, :total, :commission, :shipping_total, :rated, :payin_id, :availability_id, :delivery_request_id
 	json.delivery_request delivery.delivery_request
 	json.buyer delivery.delivery_request.buyer
 	json.deliveryman !delivery.availability.blank? ? delivery.availability.deliveryman : nil

@@ -5,6 +5,57 @@ class BaseController < ActionController::Base
   skip_before_filter :verify_authenticity_token
   after_filter :cors_set_access_control_headers
 
+  def create_user_from_params(params)
+        @user = User.new(params)
+        if @user.save && @user.errors.present? == false
+            @user.avatar.recreate_versions!
+            @user.save!
+
+            @auth_token = jwt_token(@user, params[:password])
+            @wallet = Wallet.create! user_id: @user.id
+            if @wallet.errors.present?
+                render json: {errors: @user.errors.messages}, status: 422
+            else
+                @user.update({wallet_id: @wallet.id})
+                render json: {token: @auth_token, user: @user}, status: 201
+            end
+        else
+            render json: {errors: @user.errors.messages}, status: 422
+        end
+    end
+
+  def check_google_token_from_params(params)
+    server_auth_code = params[:auth_token]
+    refresh_token = params[:refresh_token]
+
+    if !refresh_token.nil?
+      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
+                                body: {
+                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
+                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
+                                    grant_type: 'refresh_token',
+                                    refresh_token: params[:refresh_token]
+                                  })
+    else
+      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
+                                body: {
+                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
+                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
+                                    grant_type: 'authorization_code',
+                                    code: server_auth_code
+                                  })
+    end
+  end
+
+  def get_avatar_from_url(url)
+    response = HTTParty.get(url)
+    if response.code === 200
+      'data:image/jpg;base64,' + Base64.encode64(response.body)
+    else
+      ''
+    end
+  end
+
   def cors_set_access_control_headers
     headers['Access-Control-Allow-Origin'] = '*'
     headers['Access-Control-Allow-Methods'] = 'POST, PATCH, GET, PUT, DELETE, OPTIONS'
@@ -47,8 +98,8 @@ class BaseController < ActionController::Base
       else
         return render_unauthorized
       end
-    # elsif user = User.find_by(auth_token: token_from_request)
-    #   @current_user = user
+    elsif user = User.find_by(auth_token: token_from_request)
+      @current_user = user
     else
       return render_unauthorized
     end
@@ -61,13 +112,13 @@ class BaseController < ActionController::Base
   end
 
   def jwt_token user, password
-    # if user.auth_method === 'facebook' or user.auth_method === 'google'
-    #   user.auth_token
-    # else
-    # 100 years
-    expires = Time.now.to_i + (3600 * 24 * 30 * 12 * 100)
-    JWT.encode({:user => user.email, :password => password, :exp => expires}, "YOURSECRETKEY", 'HS256')
-    # end
+    if user.auth_method === 'facebook' or user.auth_method === 'google'
+      user.auth_token
+    else
+      # 100 years
+      expires = Time.now.to_i + (3600 * 24 * 30 * 12 * 100)
+      JWT.encode({:user => user.email, :password => password, :exp => expires}, "YOURSECRETKEY", 'HS256')
+    end
   end
 
   def render_unauthorized(payload = { errors: { unauthorized: ["You are not authorized perform this action."] } })
