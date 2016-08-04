@@ -1,4 +1,4 @@
-json.extract! @delivery, :id, :status, :validation_code, :total, :commission, :payin_id, :availability_id, :delivery_request_id, :created_at, :updated_at, :delivery_contents
+json.extract! @delivery, :id, :status, :validation_code, :total, :commission, :rated, :payin_id, :availability_id, :delivery_request_id, :created_at, :updated_at, :delivery_contents
 json.delivery_contents do
   json.array!(@delivery.delivery_contents) do |delivery_content|
     json.extract! delivery_content, :id, :id_delivery, :id_product, :quantity, :unit_price
