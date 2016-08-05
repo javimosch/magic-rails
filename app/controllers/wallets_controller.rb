@@ -8,6 +8,38 @@ class WalletsController < BaseController
     @wallets = Wallet.all
   end
 
+  # GET /wallets/value
+  # GET /wallets/value.json
+  def value
+
+    proxy = URI(ENV['FIXIE_URL'])
+
+    response = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+      http_proxyaddr: proxy.host,
+      http_proxyport: proxy.port,
+      http_proxyuser: proxy.user,
+      http_proxypass: proxy.password,
+      headers: {
+        'Content-Type' => 'application/json; charset=utf-8',
+      },
+      body: {
+        wlLogin: ENV['LEMONWAY_LOGIN'],
+        wlPass: ENV['LEMONWAY_PASS'],
+        language: 'fr',
+        version: '1.8',
+        walletIp: request.remote_ip,
+        walletUa: 'ruby/rails',
+        wallet: current_user.wallet.lemonway_id,
+        email: current_user.email
+      }.to_json
+    );
+
+    if response.code == 200
+      @value = response['d']['WALLET']['BAL']
+    end
+
+  end
+
   # GET /wallets/1
   # GET /wallets/1.json
   def show

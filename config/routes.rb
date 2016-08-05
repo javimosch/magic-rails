@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   post '/availabilities/:id/cancel' => 'availabilities#cancel', :defaults => { :format => :json }
   post '/delivery_requests/:id/cancel' => 'delivery_requests#cancel', :defaults => { :format => :json }
   get 'products' => 'shops#products', :defaults => { :format => :json }
+  get '/wallets/:id/value' => 'wallets#value', :defaults => { :format => :json }
 
   get 'app' => 'home#app', :defaults => { :format => :html }
 
