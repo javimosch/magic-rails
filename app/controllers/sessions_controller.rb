@@ -96,7 +96,7 @@ class SessionsController < BaseController
       if user_params[:auth_token].blank?
         return render_unauthorized error_message: "Une erreur est survenue lors de la connexion avec Facebook."
       end
-    elsif user_params[:auth_method] == 'google' && seller_params[:refresh_token].blank?
+    elsif user_params[:auth_method] == 'google' && user_params[:refresh_token].blank?
       if user_params[:auth_token].blank?
         return render_unauthorized error_message: "Une erreur est survenue lors de la connexion avec Google."
       end
