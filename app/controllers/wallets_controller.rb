@@ -34,6 +34,10 @@ class WalletsController < BaseController
       }.to_json
     );
 
+    ap "**** DEBUG LW *****"
+    ap response
+    ap "*******************"
+
     if response.code == 200
       @value = response['d']['WALLET']['BAL']
     end
