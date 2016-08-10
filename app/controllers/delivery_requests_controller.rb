@@ -1,28 +1,38 @@
 class DeliveryRequestsController < BaseController
   before_action :set_delivery_request, only: [:show, :edit, :cancel, :update, :destroy]
 
-  # GET /delivery_requests
-  # GET /delivery_requests.json
+  # Retourne la liste de toutes les demandes de livraison.
+  #
+  # @note GET /delivery_requests
+  # @note GET /delivery_requests.json
   def index
     @delivery_requests = DeliveryRequest.all
   end
 
-  # GET /delivery_requests/1
-  # GET /delivery_requests/1.json
+  # Retourne la demande de livraison correspondant au paramètre 1.
+  #
+  # @note GET /delivery_requests/1
+  # @note GET /delivery_requests/1.json
   def show
   end
 
-  # GET /delivery_requests/new
+  # Affiche le formulaire de création d'une nouvelle demande de livraison.
+  #
+  # @note GET /delivery_requests/new
   def new
     @delivery_request = DeliveryRequest.new
   end
 
-  # GET /delivery_requests/1/edit
+  # Affiche le formulaire d'édition d'une demande de livraison correspondant au paramètre 1.
+  #
+  # @note GET /delivery_request/1/edit
   def edit
   end
 
-  # POST /delivery_requests
-  # POST /delivery_requests.json
+  # Créée une nouvelle demande de livraison.
+  #
+  # @note POST /delivery_request
+  # @note POST /delivery_request.json
   def create
 
     if params[:schedule].present?
@@ -60,8 +70,10 @@ class DeliveryRequestsController < BaseController
 
   end
 
-  # POST /delivery_requests/1/cancel
-  # POST /delivery_requests/1/cancel.json
+  # Annulation de la demande de livraison correspondant au paramètre 1.
+  #
+  # @note POST /delivery_requests/1/cancel
+  # @note POST /delivery_requests/1/cancel.json
   def cancel
     respond_to do |format|
       if !@delivery_request.nil? && !@delivery_request.delivery_id.nil?
@@ -95,8 +107,10 @@ class DeliveryRequestsController < BaseController
     end
   end
 
-  # PATCH/PUT /delivery_requests/1
-  # PATCH/PUT /delivery_requests/1.json
+  # Mise à jour de la demande de livraison correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /delivery_requests/1
+  # @note PATCH/PUT /delivery_requests/1.json
   def update
     respond_to do |format|
       if @delivery_request.update(delivery_request_params)
@@ -109,8 +123,10 @@ class DeliveryRequestsController < BaseController
     end
   end
 
-  # DELETE /delivery_requests/1
-  # DELETE /delivery_requests/1.json
+  # Suppression de la demande de livraison correspondant au paramètre 1.
+  #
+  # @note DELETE /delivery_requests/1
+  # @note DELETE /delivery_requests/1.json
   def destroy
     @delivery_request.destroy
     respond_to do |format|

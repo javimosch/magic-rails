@@ -1,8 +1,10 @@
 class AvailabilitiesController < BaseController
   before_action :set_availability, only: [:show, :edit, :update, :destroy, :cancel]
 
-  # GET /availabilities
-  # GET /availabilities.json
+  # Retourne la liste de toutes les disponibilités correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /availabilities
+  # @note GET /availabilities.json
   def index
     @availabilities = Availability.joins(:schedule).where(deliveryman_id: current_user.id, enabled: true).where('schedules.date >= ?', Time.now.beginning_of_day)
 
@@ -20,22 +22,30 @@ class AvailabilitiesController < BaseController
     end
   end
 
-  # GET /availabilities/1
-  # GET /availabilities/1.json
+  # Retourne la disponibilité correspondant au paramètre 1.
+  #
+  # @note GET /availabilities/1
+  # @note GET /availabilities/1.json
   def show
   end
 
-  # GET /availabilities/new
+  # Affiche le formulaire de création d'une nouvelle disponibilité.
+  #
+  # @note GET /availabilities/new
   def new
     @availability = Availability.new
   end
 
-  # GET /availabilities/1/edit
+  # Affiche le formulaire d'édition de la disponibilité correspondant au paramètre 1.
+  #
+  # @note GET /availabilities/1/edit
   def edit
   end
 
-  # POST /availabilities
-  # POST /availabilities.json
+  # Créée une nouvelle disponibilité.
+  #
+  # @note POST /availabilities
+  # @note POST /availabilities.json
   def create
 
     availabilities_ids = Availability.where("deliveryman_id = ? AND shop_id != ? AND enabled = ?", params[:deliveryman_id], params[:shop_id], true).map { |availability| availability.id }
@@ -67,8 +77,10 @@ class AvailabilitiesController < BaseController
     end
   end
 
-  # POST /availabilities/1/cancel
-  # POST /availabilities/1/cancel.json
+  # Annulation de la disponibilité correspondant au paramètre 1.
+  #
+  # @note POST /availabilities/1/cancel
+  # @note POST /availabilities/1/cancel.json
   def cancel
     respond_to do |format|
       if !@availability.nil? && !@availability.delivery_id.nil?
@@ -110,8 +122,10 @@ class AvailabilitiesController < BaseController
     end
   end
 
-  # PATCH/PUT /availabilities/1
-  # PATCH/PUT /availabilities/1.json
+  # Mise à jour de la disponibilité correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /availabilities/1
+  # @note PATCH/PUT /availabilities/1.json
   def update
     respond_to do |format|
       if @availability.update(availability_params)
@@ -124,8 +138,10 @@ class AvailabilitiesController < BaseController
     end
   end
 
-  # DELETE /availabilities/1
-  # DELETE /availabilities/1.json
+  # Suppression de la disponibilité correspondant au paramètre 1.
+  #
+  # @note DELETE /availabilities/1
+  # @note DELETE /availabilities/1.json
   def destroy
     @availability.destroy
     respond_to do |format|

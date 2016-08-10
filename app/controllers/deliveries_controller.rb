@@ -1,8 +1,10 @@
 class DeliveriesController < BaseController
   before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm, :cancel]
 
-  # GET /deliveries
-  # GET /deliveries.json
+  # Retourne la liste de toutes les livraisons correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /deliveries
+  # @note GET /deliveries.json
   def index
 
     @availabilities = Availability.where(deliveryman_id: current_user.id).order(created_at: :desc)
@@ -13,8 +15,10 @@ class DeliveriesController < BaseController
     @deliveries = Delivery.where(availability_id: ids).order(created_at: :desc)
   end
 
-  # GET /orders
-  # GET /orders.json
+  # Retourne la liste de toutes les commandes correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /orders
+  # @note GET /orders.json
   def orders
 
     @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true).order(created_at: :desc)
@@ -27,22 +31,30 @@ class DeliveriesController < BaseController
 
   end
 
-  # GET /deliveries/1
-  # GET /deliveries/1.json
+  # Retourne la livraison/commande correspondant au paramètre 1.
+  #
+  # @note GET /deliveries/1
+  # @note GET /deliveries/1.json
   def show
   end
 
-  # GET /deliveries/new
+  # Affiche le formulaire de création d'une nouvelle livraison/commande.
+  #
+  # @note GET /deliveries/new
   def new
     @delivery = Delivery.new
   end
 
-  # GET /deliveries/1/edit
+  # Affiche le formulaire d'édition d'une livraison/commande correspondant au paramètre 1.
+  #
+  # @note GET /deliveries/1/edit
   def edit
   end
 
-  # POST /deliveries
-  # POST /deliveries.json
+  # Créée une nouvelle livraison/commande.
+  #
+  # @note POST /deliveries
+  # @note POST /deliveries.json
   def create
 
     @delivery = Delivery.new(delivery_params)
@@ -61,8 +73,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/confirm
-  # POST /deliveries/1/confirm.json
+  # Confirmation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/confirm
+  # @note POST /deliveries/1/confirm.json
   def confirm
     respond_to do |format|
       if !@delivery.nil? and (current_user.id == @delivery.delivery_request.buyer_id) and (@delivery.status != 'canceled')
@@ -89,8 +103,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/cancel
-  # POST /deliveries/1/cancel.json
+  # Annulation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/cancel
+  # @note POST /deliveries/1/cancel.json
   def cancel
     respond_to do |format|
       if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
@@ -111,8 +127,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/finalize
-  # POST /deliveries/1/finalize.json
+  # Finalisation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/finalize
+  # @note POST /deliveries/1/finalize.json
   def finalize
 
     proxy = URI(ENV['FIXIE_URL'])
@@ -149,8 +167,6 @@ class DeliveriesController < BaseController
             }.to_json
           );
 
-          ap wallet
-
           if wallet.code == 200
             @walletValue = wallet['d']['WALLET']['BAL'].to_f
           end
@@ -184,8 +200,6 @@ class DeliveriesController < BaseController
             }.to_json
           );
 
-          ap response
-
           if response.code == 200
 
             if response['d']['TRANS'].present?
@@ -213,8 +227,6 @@ class DeliveriesController < BaseController
                   privateData: ''
                 }.to_json
               );
-
-              ap payment
 
               if payment['d']['TRANS_SENDPAYMENT'].present?
 
@@ -276,8 +288,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # PATCH/PUT /deliveries/1
-  # PATCH/PUT /deliveries/1.json
+  # Mise à jour de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /deliveries/1
+  # @note PATCH/PUT /deliveries/1.json
   def update
 
     delivery_contents = params[:delivery_contents]
@@ -297,7 +311,7 @@ class DeliveriesController < BaseController
       total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    #Delivery.update(@delivery.id, :total => total)
+    # Delivery.update(@delivery.id, :total => total)
 
     respond_to do |format|
       if @delivery.update(total: total)
@@ -310,8 +324,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # DELETE /deliveries/1
-  # DELETE /deliveries/1.json
+  # Suppression de l'adresse correspondant au paramètre 1.
+  #
+  # @note DELETE /deliveries/1
+  # @note DELETE /deliveries/1.json
   def destroy
     @delivery.destroy
     respond_to do |format|

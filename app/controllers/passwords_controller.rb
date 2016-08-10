@@ -1,6 +1,7 @@
 class PasswordsController < Devise::PasswordsController
 	skip_before_filter :authenticate_user_from_token!, only: [:create, :edit, :update]
 
+	# Créée une demande de réinitialisation de mot de passe.
 	def create
 		self.resource = resource_class.send_reset_password_instructions(resource_params)
 	    yield resource if block_given?
@@ -12,6 +13,7 @@ class PasswordsController < Devise::PasswordsController
 	    end
 	end
 
+	# Mise à jour du mot de passe après une demande de réinitialisation de mot de passe.
 	def update
 		self.resource = resource_class.reset_password_by_token(resource_params)
 	    yield resource if block_given?

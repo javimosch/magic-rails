@@ -1,28 +1,38 @@
 class RatingsController < BaseController
   before_action :set_rating, only: [:show, :edit, :update, :destroy]
 
-  # GET /ratings
-  # GET /ratings.json
+  # Retourne la liste de toutes les notes.
+  #
+  # @note GET /ratings
+  # @note GET /ratings.json
   def index
     @ratings = Rating.all
   end
 
-  # GET /ratings/1
-  # GET /ratings/1.json
+  # Retourne la note correspondant au paramètre 1.
+  #
+  # @note GET /ratings/1
+  # @note GET /ratings/1.json
   def show
   end
 
-  # GET /ratings/new
+  # Affiche le formulaire de création d'une nouvelle note.
+  #
+  # @note GET /ratings/new
   def new
     @rating = Rating.new
   end
 
-  # GET /ratings/1/edit
+  # Affiche le formulaire d'édition de la note correspondant au paramètre 1.
+  #
+  # @note GET /ratings/1/edit
   def edit
   end
 
-  # POST /ratings
-  # POST /ratings.json
+  # Créée une nouvelle note.
+  #
+  # @note POST /ratings
+  # @note POST /ratings.json
   def create
     @rating = Rating.new(rating_params)
 
@@ -37,8 +47,10 @@ class RatingsController < BaseController
     end
   end
 
-  # PATCH/PUT /ratings/1
-  # PATCH/PUT /ratings/1.json
+  # Mise à jour de la note correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /ratings/1
+  # @note PATCH/PUT /ratings/1.json
   def update
     respond_to do |format|
       if @rating.update(rating_params)
@@ -51,8 +63,10 @@ class RatingsController < BaseController
     end
   end
 
-  # DELETE /ratings/1
-  # DELETE /ratings/1.json
+  # Suppression de l'adresse correspondant au paramètre 1.
+  #
+  # @note DELETE /ratings/1
+  # @note DELETE /ratings/1.json
   def destroy
     @rating.destroy
     respond_to do |format|

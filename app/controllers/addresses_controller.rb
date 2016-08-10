@@ -1,28 +1,39 @@
 class AddressesController < BaseController
   before_action :set_address, only: [:show, :edit, :update, :destroy]
 
-  # GET /addresses
-  # GET /addresses.json
+  # Retourne la liste de toutes les adresses.
+  #
+  # @note GET /addresses
+  # @note GET /addresses.json
   def index
     @addresses = Address.all
   end
 
-  # GET /addresses/1
-  # GET /addresses/1.json
+  # Retourne l'adresse correspondant au paramètre 1.
+  #
+  # @note GET /addresses/1
+  # @note GET /addresses/1.json
   def show
   end
 
-  # GET /addresses/new
+
+  # Affiche le formulaire de création d'une nouvelle adresse.
+  #
+  # @note GET /addresses/new
   def new
     @address = Address.new
   end
 
-  # GET /addresses/1/edit
+  # Affiche le formulaire d'édition de l'adresse correspondant au paramètre 1.
+  #
+  # @note GET /addresses/1/edit
   def edit
   end
 
-  # POST /addresses
-  # POST /addresses.json
+  # Créée une nouvelle adresse.
+  #
+  # @note POST /addresses
+  # @note POST /addresses.json
   def create
     @address = Address.new(address_params)
 
@@ -37,8 +48,10 @@ class AddressesController < BaseController
     end
   end
 
-  # PATCH/PUT /addresses/1
-  # PATCH/PUT /addresses/1.json
+  # Mise à jour de l'adresse correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /addresses/1
+  # @note PATCH/PUT /addresses/1.json
   def update
     respond_to do |format|
       if @address.update(address_params)
@@ -51,8 +64,10 @@ class AddressesController < BaseController
     end
   end
 
-  # DELETE /addresses/1
-  # DELETE /addresses/1.json
+  # Suppression de l'adresse correspondant au paramètre 1.
+  #
+  # @note DELETE /addresses/1
+  # @note DELETE /addresses/1.json
   def destroy
     @address.destroy
     respond_to do |format|
