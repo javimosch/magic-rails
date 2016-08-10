@@ -122,9 +122,38 @@ class DeliveriesController < BaseController
       # Le livreur entre le code et note l'acheteur
       if Delivery.exists?(id: params[:id], validation_code: params[:validation_code], status: 'completed') && current_user.id == @delivery.availability.deliveryman_id
 
-        @wallet = @delivery.delivery_request.buyer.wallet
+        @deliveryman_wallet = @delivery.availability.deliveryman.wallet
+        @buyer_wallet = @delivery.delivery_request.buyer.wallet
+        @delivery_total = @delivery.total + @delivery.shipping_total
+        @walletValue = 0
 
-        if !@wallet.lemonway_id.nil? && !@wallet.lemonway_card_id.nil?
+        if @deliveryman_wallet.lemonway_id.present?
+
+          wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+            http_proxyaddr: proxy.host,
+            http_proxyport: proxy.port,
+            http_proxyuser: proxy.user,
+            http_proxypass: proxy.password,
+            headers: {
+              'Content-Type' => 'application/json; charset=utf-8',
+            },
+            body: {
+              wlLogin: ENV['LEMONWAY_LOGIN'],
+              wlPass: ENV['LEMONWAY_PASS'],
+              language: 'fr',
+              version: '1.8',
+              walletIp: request.remote_ip,
+              walletUa: 'ruby/rails',
+              wallet: @buyer_wallet.lemonway_id,
+              email: @delivery.delivery_request.buyer.email
+            }.to_json
+          );
+
+          ap wallet
+
+          if wallet.code == 200
+            @walletValue = wallet['d']['WALLET']['BAL'].to_f
+          end
 
           response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
             http_proxyaddr: proxy.host,
@@ -141,9 +170,9 @@ class DeliveriesController < BaseController
               version: '1.8',
               walletIp: request.remote_ip,
               walletUa: 'ruby/rails',
-              wallet: @wallet.lemonway_id,
-              cardId: @wallet.lemonway_card_id,
-              amountTot: '%.2f' % (@delivery.total + @delivery.shipping_total),
+              wallet: @buyer_wallet.lemonway_id,
+              cardId: @buyer_wallet.lemonway_card_id,
+              amountTot: '%.2f' % (@walletValue >= @delivery_total ? @delivery.commission : @delivery_total - @walletValue),
               amountCom: '%.2f' % @delivery.commission,
               comment: @delivery.status,
               message: @delivery.status,
@@ -155,19 +184,63 @@ class DeliveriesController < BaseController
             }.to_json
           );
 
+          ap response
+
           if response.code == 200
 
-            if !response['d']['TRANS']['HPAY'].nil?
-              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
-              Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
-              @delivery.availability.update(enabled: false)
-              format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
-              format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
-            elsif !response['d']['E'].nil?
+            if response['d']['TRANS'].present?
+
+              payment = HTTParty.post(ENV['LEMONWAY_URL'] + '/SendPayment',
+                http_proxyaddr: proxy.host,
+                http_proxyport: proxy.port,
+                http_proxyuser: proxy.user,
+                http_proxypass: proxy.password,
+                headers: {
+                  'Content-Type' => 'application/json; charset=utf-8',
+                },
+                body: {
+                  wlLogin: ENV['LEMONWAY_LOGIN'],
+                  wlPass: ENV['LEMONWAY_PASS'],
+                  language: 'fr',
+                  version: '1.8',
+                  walletIp: request.remote_ip,
+                  walletUa: 'ruby/rails',
+                  debitWallet: @buyer_wallet.lemonway_id,
+                  creditWallet: @deliveryman_wallet.lemonway_id,
+                  amount: '%.2f' % @delivery_total,
+                  message: @delivery.id,
+                  scheduledDate: '',
+                  privateData: ''
+                }.to_json
+              );
+
+              ap payment
+
+              if payment['d']['TRANS_SENDPAYMENT'].present?
+
+                Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
+                Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
+                @delivery.availability.update(enabled: false)
+                format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
+                format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
+
+              elsif response['d']['E'].present?
+
+                ap "LEMONWAY ERROR"
+                ap response['d']['E']
+                format.html { render :edit }
+                format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+
+              end
+
+
+            elsif response['d']['E'].present?
+
               ap "LEMONWAY ERROR"
               ap response['d']['E']
               format.html { render :edit }
               format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+
             end
 
           else
