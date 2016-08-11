@@ -10,6 +10,11 @@ class DeliveryRequest < ActiveRecord::Base
 
 	after_create :check_availability
 
+	# @!method check_availability
+	# Regarde si une disponibilité est disponible sur le même horaire d'une demande de livraison.
+	# Si c'est le cas, envoie une notification à l'acheteur
+	# @!scope class
+	# @!visibility public
 	def check_availability
 
 			@availabilities = Availability.where(schedule_id: self.schedule_id, shop_id: self.shop_id, enabled: true).where.not(deliveryman_id: self.buyer_id)

@@ -13,12 +13,15 @@ class Delivery < ActiveRecord::Base
 	before_update :calculate_commission
 	before_update :calculate_shipping_total
 
-
+	# @!method buyer_rating
+	# Récupère l'évaluation de l'utilisateur sur une commande
 	def buyer_rating
 		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
 	end
 
 
+	# @!method create_delayed_jobs
+	# Créée les différents tâches asynchrones (mail/sms de rappel, annulation automatique de la commande)
 	def create_delayed_jobs
 		@schedule = self.delivery_request.schedule
 		from = @schedule.schedule.split('-')[0].to_i
@@ -39,6 +42,8 @@ class Delivery < ActiveRecord::Base
 		ap Delivery.delay(run_at: @cancel_cart).cancel_cart(self.id)
 	end
 
+	# @!method to_meta
+	# Créée un object contenant les différentes informations sur la demande de libraison et la disponibilité (Objet envoyé dans les notifications)
 	def to_meta(is_buyer)
       meta = {}
 
@@ -61,18 +66,30 @@ class Delivery < ActiveRecord::Base
 
 	private
 
+	# @!method generate_validation_code
+	# Génère le code de validation de la commande
+	# @!scope class
+	# @!visibility public
 	def generate_validation_code(size = 6)
 		charset = %w{ 2 3 4 6 7 9 A C D E F G H J K M N P Q R T V W X Y Z}
 		self.validation_code = (0...size).map{ charset.to_a[rand(charset.size)] }.join
 		self.save
 	end
 
+	# @!method check_duplicate
+	# Regarde si la commande n'a pas déjà été acceptée par un livreur
+	# @!scope class
+	# @!visibility public
 	def check_duplicate
 		if Delivery.where(delivery_request_id: self.delivery_request.id).count > 0
 			raise "This delivery has already been accepted"
 		end
 	end
 
+	# @!method send_accepted_delivery
+	# Envoie la notification d'acceptation de livraison
+	# @!scope class
+	# @!visibility public
 	def send_accepted_delivery
 
 		@availability = self.availability
@@ -102,6 +119,10 @@ class Delivery < ActiveRecord::Base
 
 	end
 
+	# @!method calculate_commission
+	# Calcule la commission de la commande
+	# @!scope class
+	# @!visibility public
 	def calculate_commission
 
 		ap "******"
@@ -124,6 +145,10 @@ class Delivery < ActiveRecord::Base
 
 	end
 
+	# @!method calculate_shipping_total
+	# Calcule les frais de livraison de la commande
+	# @!scope class
+	# @!visibility public
 	def calculate_shipping_total
 
 		if !total.nil?

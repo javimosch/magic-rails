@@ -13,14 +13,20 @@ class User < ActiveRecord::Base
 
 	mount_base64_uploader :avatar, AvatarUploader
 
+	# @!method name
+	# Retourne le nom de l'utilisateur
 	def name
 		firstname + ' ' + lastname
 	end
 
+	# @!method send_registration_notification
+	# Envoie le mail d'inscription
 	def send_registration_notification
 		Notifier.send_registration(self).deliver_now
 	end
 
+	# @!method count_deliveries
+	# Retourne le nombre de commandes terminées d'un utilisateur
 	def count_deliveries
 		Delivery.joins(:delivery_request).joins(:availability).where('status = ? AND (delivery_requests.buyer_id = ? OR availabilities.deliveryman_id = ?)', 'done', id, id).count
 	end

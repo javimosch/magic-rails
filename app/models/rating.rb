@@ -9,6 +9,10 @@ class Rating < ActiveRecord::Base
 
 	private
 
+	# @!method calculate_average
+	# Calcule la note moyenne d'un utilisateur
+	# @!scope class
+	# @!visibility public
 	def calculate_average
 		@user = User.find_by(id: to_user_id)
 		rating_average = Rating.where(to_user_id: to_user_id).average(:rating)
@@ -17,6 +21,10 @@ class Rating < ActiveRecord::Base
 
 	private
 
+	# @!method check_duplicate
+	# Retourne si l'utilisateur a déjà été noté sur une commande
+	# @!scope class
+	# @!visibility public
 	def check_duplicate
 		@rating = Rating.find_by(delivery_id: delivery_id, from_user_id: from_user_id)
 		if @rating
