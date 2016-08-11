@@ -4,8 +4,9 @@ class Schedule < ActiveRecord::Base
 
 	has_many :availabilities
 
+	# Vérifie si l'horaire est expiré.
+	#
 	# @!method expired?
-	# Retourne si l'horaire est expiré
 	def expired?
 		if self.date.to_date < Date.today
 			ap "date < today"

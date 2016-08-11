@@ -2,15 +2,16 @@ class Rating < ActiveRecord::Base
 
 	after_save :calculate_average
 	before_create :check_duplicate
-	
+
 	has_one :user, class_name: 'User', foreign_key: 'from_user_id'
 	has_one :delivery
 	belongs_to :user, class_name: 'User', foreign_key: 'to_user_id'
 
 	private
 
+	# Calcule la note moyenne d'un utilisateur.
+	#
 	# @!method calculate_average
-	# Calcule la note moyenne d'un utilisateur
 	# @!scope class
 	# @!visibility public
 	def calculate_average
@@ -21,8 +22,9 @@ class Rating < ActiveRecord::Base
 
 	private
 
+	# Vérifie si l'utilisateur a déjà été noté sur une commande.
+	#
 	# @!method check_duplicate
-	# Retourne si l'utilisateur a déjà été noté sur une commande
 	# @!scope class
 	# @!visibility public
 	def check_duplicate

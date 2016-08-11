@@ -6,14 +6,15 @@ class Availability < ActiveRecord::Base
 
 	after_create :check_delivery_request
 
-	#Demande de livraison
+	# Demande de livraison.
 	attr_accessor :delivery
 
 	private
 
-	# @!method check_delivery_request
 	# Regarde si une demande de livraison est disponible sur le même horaire d'une disponibilité.
-	# Si c'est le cas, envoie une notification au livreur
+	# Si c'est le cas, envoie une notification au livreur.
+	#
+	# @!method check_delivery_request
 	# @!scope class
 	# @!visibility public
 	def check_delivery_request

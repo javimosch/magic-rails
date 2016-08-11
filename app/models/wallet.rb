@@ -6,8 +6,9 @@ class Wallet < ActiveRecord::Base
 
 	private
 
+	# Créé le portefeuille LemonWay.
+	#
 	# @!method register
-	# Créé le wallet LemonWay
 	# @!scope class
 	# @!visibility public
 	def register

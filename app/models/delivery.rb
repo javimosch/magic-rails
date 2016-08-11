@@ -13,15 +13,16 @@ class Delivery < ActiveRecord::Base
 	before_update :calculate_commission
 	before_update :calculate_shipping_total
 
+	# Récupère l'évaluation de l'utilisateur sur une commande.
+	#
 	# @!method buyer_rating
-	# Récupère l'évaluation de l'utilisateur sur une commande
 	def buyer_rating
 		Rating.find_by(delivery_id: id, from_user_id: delivery_request.buyer)
 	end
 
-
+	# Créée les différentes tâches asynchrones. (mail/sms de rappel, annulation automatique de la commande)
+	#
 	# @!method create_delayed_jobs
-	# Créée les différents tâches asynchrones (mail/sms de rappel, annulation automatique de la commande)
 	def create_delayed_jobs
 		@schedule = self.delivery_request.schedule
 		from = @schedule.schedule.split('-')[0].to_i
@@ -34,7 +35,7 @@ class Delivery < ActiveRecord::Base
 		@sms_reminder = @date_to - 45.minutes #1h15 après le début du créneau
 		@cancel_cart = @date_to - 30.minutes
 
-		#mail au livreur au début du créneau pour lui rappeler qu'il a une commande
+		# mail au livreur au début du créneau pour lui rappeler qu'il a une commande
 
 		ap Delivery.delay(run_at: @mail_reminder).mail_reminder(self.id)
 		ap Delivery.delay(run_at: @mail_reminder2).mail_reminder(self.id)
@@ -42,8 +43,9 @@ class Delivery < ActiveRecord::Base
 		ap Delivery.delay(run_at: @cancel_cart).cancel_cart(self.id)
 	end
 
+	# Créée un object contenant les différentes informations sur la demande de libraison et la disponibilité. (Objet envoyé dans les notifications)
+	#
 	# @!method to_meta
-	# Créée un object contenant les différentes informations sur la demande de libraison et la disponibilité (Objet envoyé dans les notifications)
 	def to_meta(is_buyer)
       meta = {}
 
@@ -66,8 +68,9 @@ class Delivery < ActiveRecord::Base
 
 	private
 
+	# Génère le code de validation de la commande.
+	#
 	# @!method generate_validation_code
-	# Génère le code de validation de la commande
 	# @!scope class
 	# @!visibility public
 	def generate_validation_code(size = 6)
@@ -76,8 +79,9 @@ class Delivery < ActiveRecord::Base
 		self.save
 	end
 
+	# Regarde si la commande n'a pas déjà été acceptée par un livreur.
+	#
 	# @!method check_duplicate
-	# Regarde si la commande n'a pas déjà été acceptée par un livreur
 	# @!scope class
 	# @!visibility public
 	def check_duplicate
@@ -86,8 +90,9 @@ class Delivery < ActiveRecord::Base
 		end
 	end
 
+	# Envoie la notification d'acceptation de livraison.
+	#
 	# @!method send_accepted_delivery
-	# Envoie la notification d'acceptation de livraison
 	# @!scope class
 	# @!visibility public
 	def send_accepted_delivery
@@ -119,14 +124,13 @@ class Delivery < ActiveRecord::Base
 
 	end
 
+
+	# Calcule la commission de la commande.
+	#
 	# @!method calculate_commission
-	# Calcule la commission de la commande
 	# @!scope class
 	# @!visibility public
 	def calculate_commission
-
-		ap "******"
-		ap total
 
 		if !total.nil?
 
@@ -145,8 +149,9 @@ class Delivery < ActiveRecord::Base
 
 	end
 
+	# Calcule les frais de livraison de la commande.
+	#
 	# @!method calculate_shipping_total
-	# Calcule les frais de livraison de la commande
 	# @!scope class
 	# @!visibility public
 	def calculate_shipping_total
