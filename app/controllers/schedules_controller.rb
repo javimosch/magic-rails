@@ -1,28 +1,39 @@
 class SchedulesController < BaseController
   before_action :set_schedule, only: [:show, :edit, :update, :destroy]
 
-  # GET /schedules
-  # GET /schedules.json
+  # Retourne la liste de tous les créneaux.
+  #
+  # @note GET /schedules
+  # @note GET /schedules.json
   def index
     @schedules = Schedule.all
   end
 
-  # GET /schedules/1
-  # GET /schedules/1.json
+
+  # Retourne le créneau correspondant au paramètre 1.
+  #
+  # @note GET /schedules/1
+  # @note GET /schedules/1.json
   def show
   end
 
-  # GET /schedules/new
+  # Affiche le formulaire de création d'un nouveau créneau.
+  #
+  # @note GET /schedules/new
   def new
     @schedule = Schedule.new
   end
 
-  # GET /schedules/1/edit
+  # Affiche le formulaire d'édition d'un créneau correspondant au paramètre 1.
+  #
+  # @note GET /schedules/1/edit
   def edit
   end
 
-  # POST /schedules
-  # POST /schedules.json
+  # Créée un nouveau créneau.
+  #
+  # @note POST /schedules
+  # @note POST /schedules.json
   def create
     @schedule = Schedule.new(schedule_params)
 
@@ -37,8 +48,10 @@ class SchedulesController < BaseController
     end
   end
 
-  # PATCH/PUT /schedules/1
-  # PATCH/PUT /schedules/1.json
+  # Mise à jour du créneau correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /schedules/1
+  # @note PATCH/PUT /schedules/1.json
   def update
     respond_to do |format|
       if @schedule.update(schedule_params)
@@ -51,8 +64,10 @@ class SchedulesController < BaseController
     end
   end
 
-  # DELETE /schedules/1
-  # DELETE /schedules/1.json
+  # Suppression du créneau correspondant au paramètre 1.
+  #
+  # @note DELETE /ratings/1
+  # @note DELETE /ratings/1.json
   def destroy
     @schedule.destroy
     respond_to do |format|

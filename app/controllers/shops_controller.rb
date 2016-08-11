@@ -1,7 +1,10 @@
 class ShopsController < BaseController
   include ShopsHelper
-  # GET /shops
-  # GET /shops.json
+
+  # Retourne la liste de tous les magasins correspondant à l'adresse/position de l'utilisateur actuel.
+  #
+  # @note GET /shops
+  # @note GET /shops.json
   def index
 
     @response = []
@@ -68,8 +71,10 @@ class ShopsController < BaseController
 
   end
 
-  # GET /products
-  # GET /products.json
+  # Retourne la liste de tous les produits recherchés.
+  #
+  # @note GET /products
+  # @note GET /products.json
   def products
 
     @response = []
@@ -95,6 +100,7 @@ class ShopsController < BaseController
 
   end
 
+  # Recherche d'une chaine de caractères dans une autre.
   def includes_strings?(words, haystack)
     words.downcase.split(' ').each do |word|
       haystack = ActiveSupport::Inflector.transliterate(haystack)
@@ -105,35 +111,14 @@ class ShopsController < BaseController
     return true
   end
 
-  # GET /shops/1
-  # GET /shops/1.json
+  # Retourne le magasin correspondant au paramètre 1.
+  #
+  # @note GET /shops/1
+  # @note GET /shops/1.json
   def show
     @response = HTTParty.get("https://www.mastercourses.com/api2/stores/#{params['id']}/", query: {
       mct: ENV['MASTERCOURSE_KEY']
     });
-  end
-
-  # GET /shops/new
-  def new
-  end
-
-  # GET /shops/1/edit
-  def edit
-  end
-
-  # POST /shops
-  # POST /shops.json
-  def create
-  end
-
-  # PATCH/PUT /shops/1
-  # PATCH/PUT /shops/1.json
-  def update
-  end
-
-  # DELETE /shops/1
-  # DELETE /shops/1.json
-  def destroy
   end
 
   private

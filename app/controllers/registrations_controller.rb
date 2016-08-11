@@ -3,6 +3,7 @@ class RegistrationsController < BaseController
 	skip_before_filter :authenticate_user_from_token!, only: [:create]
 	respond_to :json
 
+		# Création d'un compte utilisateur.
     def create
         if user_params[:auth_method] === 'email'
             if (User.find_by(email: user_params['email']))
@@ -72,6 +73,7 @@ class RegistrationsController < BaseController
 
 	end
 
+	# Mise à jour d'un compte utilisateur.
 	def update
 		@user = current_user
 		if @user.update!(user_params)
@@ -87,6 +89,7 @@ class RegistrationsController < BaseController
 
 	private
 
+  # Never trust parameters from the scary internet, only allow the white list through.
 	def user_params
 		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :refresh_token, :wallet_id)
 	end

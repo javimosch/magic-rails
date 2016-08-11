@@ -2,6 +2,7 @@ class SessionsController < BaseController
   skip_before_filter :authenticate_user_from_token!, :only => [:create]
   before_filter :ensure_params_exist
 
+  # Création d'une session.
   def create
     if user_params[:auth_method] === 'email'
       @user = User.find_for_database_authentication(email: user_params[:email])
@@ -79,18 +80,21 @@ class SessionsController < BaseController
 
   private
 
+  # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
     params.permit(:email, :password, :auth_token, :auth_method, :refresh_token)
   end
 
+  # Never trust parameters from the scary internet, only allow the white list through.
   def user_create_params
     params.permit(:email, :password, :auth_token, :auth_method, :firstname, :lastname, :avatar)
   end
 
+  # Vérification de la présence de certains paramètres.
   def ensure_params_exist
     if user_params[:auth_method] == 'email'
       if user_params[:email].blank? || user_params[:password].blank?
-        return render_unauthorized error_message: "Votre email et votre mot de passe sont nécessaires" 
+        return render_unauthorized error_message: "Votre email et votre mot de passe sont nécessaires"
       end
     elsif user_params[:auth_method] == 'facebook'
       if user_params[:auth_token].blank?
@@ -102,6 +106,8 @@ class SessionsController < BaseController
       end
     end
   end
+
+  # Retourne une tentative de login échouée.
   def invalid_login_attempt
     render_unauthorized error_message: "Vérifiez votre email et votre mot de passe"
   end
