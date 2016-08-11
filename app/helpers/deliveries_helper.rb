@@ -2,10 +2,14 @@ module DeliveriesHelper
 	extend ActiveSupport::Concern
 
 	module ClassMethods
+		# @!method set_delivery(delivery_id)
+		# Assigne la variable @delivery avec la commande correspondant au paramètre delivery_id
 		def set_delivery(delivery_id)
 			@delivery = Delivery.find(delivery_id)
 		end
 
+		# @!method mail_reminder(delivery_id)
+		# Envoie un mail de rappel à l'acheteur de la commande correspondant au paramètre delivery_id s'il n'a toujours pas rempli son panier
 		def mail_reminder(delivery_id)
 			set_delivery(delivery_id)
 
@@ -15,6 +19,8 @@ module DeliveriesHelper
 			end
 		end
 
+		# @!method sms_reminder(delivery_id)
+		# Envoie un sms de rappel à l'acheteur de la commande correspondant au paramètre delivery_id s'il n'a toujours pas rempli son panier
 		def sms_reminder(delivery_id)
 			set_delivery(delivery_id)
 
@@ -36,6 +42,8 @@ module DeliveriesHelper
 			end
 		end
 
+		# @!method cancel_cart(delivery_id)
+		# Annule la commande correspondant au paramètre delivery_id si l'acheteur n'a toujours pas rempli son panier
 		def cancel_cart(delivery_id)
 			set_delivery(delivery_id)
 
