@@ -4,3 +4,24 @@
 <p><%= t('.instruction', :default => "You can confirm your account email through the link below:") %></p>
 <p><%= link_to t('.action', :default => "Confirm my account"),
          confirmation_url(@resource, :confirmation_token => (Devise::VERSION.start_with?('3.') ? @token : @resource.confirmation_token)) %></p>
+
+<p>
+ <p>
+   A tout de suite,
+ </p>
+ <p>
+    L'équipe Shopmycourses.
+ </p>
+</p>
+<img src="http://res.cloudinary.com/hxfw95smx/image/upload/v1467186637/logo-email.png" width="26%">
+<p>
+ <span style="color:#749aff;font-size:10pt;font-family:times new roman,times,serif">10, rue de Penthièvre 75008 Paris</span>
+</p>
+<p>
+ <span style="color:#749aff;font-size:10pt;font-family:times new roman,times,serif">
+   <a href="mailto:contact@shopmycourses.fr" rel="noreferrer" target="_blank" style="color:#749aff">contact@shopmycourses.fr</a>
+ </span>
+</p>
+<p>
+ <a href="http://www.shopmycourses.fr/" rel="noreferrer" target="_blank">www.shopmycourses.fr</a>
+</p>
