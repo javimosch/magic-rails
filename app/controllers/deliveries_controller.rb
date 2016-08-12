@@ -142,7 +142,7 @@ class DeliveriesController < BaseController
 
         @deliveryman_wallet = @delivery.availability.deliveryman.wallet
         @buyer_wallet = @delivery.delivery_request.buyer.wallet
-        @delivery_total = @delivery.total + @delivery.shipping_total
+        @delivery_total = @delivery.total + @delivery.commission
         @walletValue = 0
 
         if @deliveryman_wallet.lemonway_id.present?
