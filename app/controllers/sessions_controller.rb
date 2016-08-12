@@ -22,19 +22,10 @@ class SessionsController < BaseController
 
         response = JSON.parse(response.body)
         @user = User.find_for_database_authentication(email: response['email'])
+        return invalid_login_attempt unless @user
 
-        if @user
-          @user.update(auth_method: user_params[:auth_method], auth_token: user_params[:auth_token])
-          render json: {token: user_params[:auth_token], user: @user}, status: 201
-        else
-          password = ('0'..'z').to_a.shuffle.first(8).join
-          params[:password] = password
-          params[:email] = response['email']
-          params[:firstname] = response['first_name']
-          params[:lastname] = response['last_name']
-          params[:avatar] = get_avatar_from_url(response['picture']['data']['url'])
-          create_user_from_params(user_create_params)
-        end
+        @user.update(auth_method: user_params[:auth_method], auth_token: user_params[:auth_token])
+        render json: {token: user_params[:auth_token], user: @user}, status: 201
 
       else
         render json: {errors: 'Une erreur est survenue lors de la connexion avec Facebook.'}, status: 422
@@ -57,19 +48,10 @@ class SessionsController < BaseController
 
         response = JSON.parse(response.body)
         @user = User.find_for_database_authentication(email: response['email'])
+        return invalid_login_attempt unless @user
 
-        if @user
-          @user.update(auth_method: user_params[:auth_method], auth_token: user_params[:auth_token])
-          render json: {token: user_params[:auth_token], user: @user}, status: 201
-        else
-          password = ('0'..'z').to_a.shuffle.first(8).join
-          params[:password] = password
-          params[:email] = response['email']
-          params[:firstname] = response['given_name']
-          params[:lastname] = response['family_name']
-          params[:avatar] = get_avatar_from_url(response['picture'])
-          create_user_from_params(user_create_params)
-        end
+        @user.update(auth_method: user_params[:auth_method], auth_token: user_params[:auth_token])
+        render json: {token: user_params[:auth_token], user: @user}, status: 201
 
       else
         render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
