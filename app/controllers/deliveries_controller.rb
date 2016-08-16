@@ -143,8 +143,33 @@ class DeliveriesController < BaseController
         @deliveryman_wallet = @delivery.availability.deliveryman.wallet
         @buyer_wallet = @delivery.delivery_request.buyer.wallet
         @delivery_total = @delivery.total + @delivery.commission
+        @walletValue = 0
 
         if @deliveryman_wallet.lemonway_id.present?
+
+          wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+            http_proxyaddr: proxy.host,
+            http_proxyport: proxy.port,
+            http_proxyuser: proxy.user,
+            http_proxypass: proxy.password,
+            headers: {
+              'Content-Type' => 'application/json; charset=utf-8',
+            },
+            body: {
+              wlLogin: ENV['LEMONWAY_LOGIN'],
+              wlPass: ENV['LEMONWAY_PASS'],
+              language: 'fr',
+              version: '1.8',
+              walletIp: request.remote_ip,
+              walletUa: 'ruby/rails',
+              wallet: @buyer_wallet.lemonway_id,
+              email: @delivery.delivery_request.buyer.email
+            }.to_json
+          );
+
+          if wallet.code == 200
+            @walletValue = wallet['d']['WALLET']['BAL'].to_f
+          end
 
           response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
             http_proxyaddr: proxy.host,
@@ -163,7 +188,7 @@ class DeliveriesController < BaseController
               walletUa: 'ruby/rails',
               wallet: @buyer_wallet.lemonway_id,
               cardId: @buyer_wallet.lemonway_card_id,
-              amountTot: '%.2f' % @delivery_total,
+              amountTot: '%.2f' % (@walletValue > @delivery_total ? @delivery.commission - @delivery.shipping_total : @delivery_total - @walletValue),
               amountCom: '%.2f' % (@delivery.commission - @delivery.shipping_total),
               comment: @delivery.status,
               message: @delivery.status,
