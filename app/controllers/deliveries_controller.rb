@@ -211,15 +211,14 @@ class DeliveriesController < BaseController
                 format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
                 format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
 
-              elsif response['d']['E'].present?
+              elsif payment['d']['E'].present?
 
                 ap "LEMONWAY ERROR"
-                ap response['d']['E']
+                ap payment['d']['E']
                 format.html { render :edit }
-                format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+                format.json { render json: { notice: payment['d']['E']['Msg'] }, status: :unprocessable_entity }
 
               end
-
 
             elsif response['d']['E'].present?
 
@@ -261,6 +260,7 @@ class DeliveriesController < BaseController
       end
 
     end
+
   end
 
   # Mise à jour de la livraison/commande correspondant au paramètre 1.
