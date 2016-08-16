@@ -164,7 +164,7 @@ class DeliveriesController < BaseController
               wallet: @buyer_wallet.lemonway_id,
               cardId: @buyer_wallet.lemonway_card_id,
               amountTot: '%.2f' % @delivery_total,
-              amountCom: '%.2f' % @delivery.commission,
+              amountCom: '%.2f' % (@delivery.commission - @delivery.shipping_total),
               comment: @delivery.status,
               message: @delivery.status,
               autoCommission: '0',
@@ -196,7 +196,7 @@ class DeliveriesController < BaseController
                   walletUa: 'ruby/rails',
                   debitWallet: @buyer_wallet.lemonway_id,
                   creditWallet: @deliveryman_wallet.lemonway_id,
-                  amount: '%.2f' % @delivery_total,
+                  amount: '%.2f' % (@delivery.total + @delivery.shipping_total),
                   message: @delivery.id,
                   scheduledDate: '',
                   privateData: ''
