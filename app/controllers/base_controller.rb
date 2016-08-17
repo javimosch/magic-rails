@@ -9,7 +9,9 @@ class BaseController < ActionController::Base
   #
   # @param params [Object] Informations sur l'utilisateur
   def create_user_from_params(params)
+
     @user = User.new(params)
+
     if @user.save && @user.errors.present? == false
 
       @user.avatar.recreate_versions!
@@ -24,9 +26,7 @@ class BaseController < ActionController::Base
       end
 
     else
-
       render json: {errors: @user.errors.messages}, status: 422
-
     end
   end
 
@@ -34,26 +34,24 @@ class BaseController < ActionController::Base
   #
   # @param params [Object] Informations sur l'utilisateur
   def check_google_token_from_params(params)
-    server_auth_code = params[:auth_token]
-    refresh_token = params[:refresh_token]
 
-    if !refresh_token.nil?
-      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
-                                body: {
-                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
-                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
-                                    grant_type: 'refresh_token',
-                                    refresh_token: params[:refresh_token]
-                                  })
+    if params.has_key?(:id_token)
+      # Checking validity of idToken
+      response = HTTParty.get("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=#{params[:id_token]}")
+      if response.code != 200
+        return { code: response.code, message: 'Error authenticating : wrong idToken' }
+      else
+        # Still need to verify the token is for our app
+        if response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
+          return { code: 401, message: 'Error authenticating : idToken is not for Shopmycourses' }
+        else
+          return { code: 200, email: response['email'], given_name: response['given_name'], family_name: response['family_name'], picture: response['picture']}
+        end
+      end
     else
-      HTTParty.post('https://www.googleapis.com/oauth2/v4/token',
-                                body: {
-                                    client_id: '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com',
-                                    client_secret: 'mHYHMuW_Fw24IZ8UfnPSdRDF',
-                                    grant_type: 'authorization_code',
-                                    code: server_auth_code
-                                  })
+      return { code: 401, message: 'Error authenticating : missing idToken' }
     end
+
   end
 
   # Récupération de l'avatar à partir de l'url

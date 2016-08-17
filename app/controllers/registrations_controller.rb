@@ -5,12 +5,12 @@ class RegistrationsController < BaseController
 
 		# Création d'un compte utilisateur.
     def create
-        if user_params[:auth_method] === 'email'
-            if (User.find_by(email: user_params['email']))
-                render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
-            else
-                create_user_from_params(user_params)
-			end
+	    if user_params[:auth_method] === 'email'
+        if (User.find_by(email: user_params['email']))
+          render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
+        else
+          create_user_from_params(user_params)
+				end
 
 	    elsif user_params[:auth_method] === 'facebook'
 
@@ -33,42 +33,31 @@ class RegistrationsController < BaseController
 	        end
 
 	      else
-	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Facebook.'}, status: 422
+	        render json: {error_message: 'Une erreur est survenue lors de la connexion avec Facebook.'}, status: 422
 	      end
 
 	    elsif user_params[:auth_method] === 'google'
 
-			response = check_google_token_from_params(params)
+				response = check_google_token_from_params(params)
 
-	      if response.code != 200
-	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
+	      if response[:code] != 200
+	        render json: {error_message: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
 	        return
-	      end
-
-        response = JSON.parse(response.body)
-	      access_token = response['access_token']
-	      response = HTTParty.get('https://www.googleapis.com/oauth2/v2/userinfo?access_token=' + access_token)
-
-	      if response.code === 200
-
-					response = JSON.parse(response.body)
-	        @user = User.find_by(email: response['email'])
-
-	        if @user
+				else
+					if (User.find_by(email: response['email']))
 						render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
 	        else
 	          password = ('0'..'z').to_a.shuffle.first(8).join
             params[:password] = password
-            params[:email] = response['email']
-            params[:firstname] = response['given_name']
-            params[:lastname] = response['family_name']
-            params[:avatar] = get_avatar_from_url(response['picture'])
-            create_user_from_params(user_params)
+            params[:email] = response[:email]
+            params[:firstname] = response[:given_name]
+            params[:lastname] = response[:family_name]
+            params[:avatar] = get_avatar_from_url(response[:picture])
+						params[:auth_token] = params[:id_token]
+						create_user_from_params(user_params)
 	        end
-
-	      else
-	        render json: {errors: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
 	      end
+
 	    end
 
 	end
@@ -91,7 +80,7 @@ class RegistrationsController < BaseController
 
   # Never trust parameters from the scary internet, only allow the white list through.
 	def user_params
-		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :refresh_token, :wallet_id)
+		params.permit(:email, :password, :password_confirmation, :firstname, :lastname, :phone, :share_phone, :avatar, :auth_method, :auth_token, :wallet_id)
 	end
 
 end
