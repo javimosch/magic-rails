@@ -44,7 +44,7 @@ class RegistrationsController < BaseController
 	        render json: {error_message: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
 	        return
 				else
-					if (User.find_by(email: response['email']))
+					if (User.find_by(email: response[:email]))
 						render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
 	        else
 	          password = ('0'..'z').to_a.shuffle.first(8).join

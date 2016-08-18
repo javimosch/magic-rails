@@ -39,7 +39,7 @@ class SessionsController < BaseController
         return
       else
 
-        @user = User.find_for_database_authentication(email: response['email'])
+        @user = User.find_for_database_authentication(email: response[:email])
         return invalid_login_attempt unless @user
         if @user
           @user.update(auth_method: user_params[:auth_method], auth_token: user_params[:id_token])
