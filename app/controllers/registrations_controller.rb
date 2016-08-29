@@ -64,10 +64,13 @@ class RegistrationsController < BaseController
 
 	# Mise à jour d'un compte utilisateur.
 	def update
+		if User.where(phone: params[:phone]).where.not(id: current_user.id).count > 0
+			render json: {notice: 'Ce numéro de téléphone est déjà utilisé'}, status: 422 and return
+		end
 		@user = current_user
 		if @user.update!(user_params)
 			if @user.errors.present?
-				render json: {errors: @user.errors.messages}, status: 422
+				render json: {notice: @user.errors.messages}, status: 422
 			else
 				render 'users/show.json', format: :json, status: :ok
 			end
