@@ -1,4 +1,6 @@
 class Notifier < ApplicationMailer
+  default from: ENV['ADMIN_EMAIL'],
+          bcc: ENV['BCC_ADMIN_EMAIL']
 
   # Envoie le mail de bienvenue.
   #
