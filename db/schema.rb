@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160804130830) do
+ActiveRecord::Schema.define(version: 20160909152855) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -121,10 +121,11 @@ ActiveRecord::Schema.define(version: 20160804130830) do
     t.integer  "schedule_id"
     t.integer  "shop_id"
     t.integer  "address_id"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.boolean  "match",       default: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.boolean  "match",               default: false
     t.integer  "delivery_id"
+    t.integer  "delivery_request_id"
   end
 
   create_table "notifications", force: :cascade do |t|
