@@ -17,6 +17,7 @@ class BaseController < ActionController::Base
       @user.avatar.recreate_versions!
       @user.save!
       @auth_token = jwt_token(@user, params[:password])
+
       @wallet = Wallet.create! user_id: @user.id
       if @wallet.errors.present?
         render json: {errors: @user.errors.messages}, status: 422

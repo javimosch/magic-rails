@@ -13,6 +13,7 @@ class Wallet < ActiveRecord::Base
 	# @!visibility public
 	def register
 
+
 		proxy = URI(ENV['FIXIE_URL'])
 
 		details = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
