@@ -3,13 +3,13 @@ before_script:
   - gem install dpl
 
 # Tous les commits sont deployés sur la plateforme de test
-develop:
-  type: deploy
-  script:
+#develop:
+#  type: deploy
+#  script:
   # - dpl --provider=heroku --app=shopmycourses-develop --api-key=$HEROKU_API_KEY
-  - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
-  only:
-  - develop
+#  - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
+#  only:
+#  - develop
 #
 # # Les commits de release sont deployés sur la plateforme d'évaluation (staging)
 # staging:
@@ -20,7 +20,7 @@ develop:
 #   - /^release\/.*$/
 
 # Les commits de master sont deployés sur la plateforme de production
-production:
+staging:
   type: deploy
   script:
   - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
