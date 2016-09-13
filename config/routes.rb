@@ -17,6 +17,8 @@ Rails.application.routes.draw do
   resources :shops, :defaults => { :format => :json }
   devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations', passwords: 'passwords'}
 
+  post '/users/sign_in' => 'sessions#create'
+
   get 'orders' => 'deliveries#orders', :defaults => { :format => :json }
   post '/deliveries/:id/finalize' => 'deliveries#finalize', :defaults => { :format => :json }
   post '/deliveries/:id/confirm' => 'deliveries#confirm', :defaults => { :format => :json }
