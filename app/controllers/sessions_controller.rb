@@ -60,7 +60,7 @@ class SessionsController < BaseController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_create_params
-    params.permit(:email, :password, :auth_token, :auth_method, :id_token, :firstname, :lastname, :avatar)
+    params.require(:session).permit(:email, :password, :auth_token, :auth_method, :id_token, :firstname, :lastname, :avatar)
   end
 
   # Vérification de la présence de certains paramètres.
