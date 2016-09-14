@@ -67,6 +67,9 @@ class RegistrationsController < BaseController
 		if User.where(phone: params[:phone]).where.not(id: current_user.id).count > 0
 			render json: {notice: 'Ce numéro de téléphone est déjà utilisé'}, status: 422 and return
 		end
+		if User.where(email: params[:email]).where.not(id: current_user.id).count > 0
+			render json: {notice: 'Cette adresse email est déjà utilisée'}, status: 422 and return
+		end
 		@user = current_user
 		if @user.update!(user_params)
 			if @user.errors.present?
