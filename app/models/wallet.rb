@@ -6,6 +6,11 @@ class Wallet < ActiveRecord::Base
 
 	private
 
+	# Créé le portefeuille LemonWay.
+	#
+	# @!method register
+	# @!scope class
+	# @!visibility public
 	def register
 
 		proxy = URI(ENV['FIXIE_URL'])

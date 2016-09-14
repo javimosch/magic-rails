@@ -1,8 +1,10 @@
 class DeliveriesController < BaseController
   before_action :set_delivery, only: [:show, :edit, :update, :destroy, :finalize, :confirm, :cancel]
 
-  # GET /deliveries
-  # GET /deliveries.json
+  # Retourne la liste de toutes les livraisons correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /deliveries
+  # @note GET /deliveries.json
   def index
 
     @availabilities = Availability.where(deliveryman_id: current_user.id).order(created_at: :desc)
@@ -13,8 +15,10 @@ class DeliveriesController < BaseController
     @deliveries = Delivery.where(availability_id: ids).order(created_at: :desc)
   end
 
-  # GET /orders
-  # GET /orders.json
+  # Retourne la liste de toutes les commandes correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /orders
+  # @note GET /orders.json
   def orders
 
     @orders = DeliveryRequest.where('buyer_id = ? AND (match = ? OR (match = ? AND delivery_id IS NULL))', current_user.id, false, true).order(created_at: :desc)
@@ -27,22 +31,30 @@ class DeliveriesController < BaseController
 
   end
 
-  # GET /deliveries/1
-  # GET /deliveries/1.json
+  # Retourne la livraison/commande correspondant au paramètre 1.
+  #
+  # @note GET /deliveries/1
+  # @note GET /deliveries/1.json
   def show
   end
 
-  # GET /deliveries/new
+  # Affiche le formulaire de création d'une nouvelle livraison/commande.
+  #
+  # @note GET /deliveries/new
   def new
     @delivery = Delivery.new
   end
 
-  # GET /deliveries/1/edit
+  # Affiche le formulaire d'édition d'une livraison/commande correspondant au paramètre 1.
+  #
+  # @note GET /deliveries/1/edit
   def edit
   end
 
-  # POST /deliveries
-  # POST /deliveries.json
+  # Créée une nouvelle livraison/commande.
+  #
+  # @note POST /deliveries
+  # @note POST /deliveries.json
   def create
 
     @delivery = Delivery.new(delivery_params)
@@ -61,9 +73,14 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/confirm
-  # POST /deliveries/1/confirm.json
+  # Confirmation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/confirm
+  # @note POST /deliveries/1/confirm.json
   def confirm
+
+    proxy = URI(ENV['FIXIE_URL'])
+
     respond_to do |format|
       if !@delivery.nil? and (current_user.id == @delivery.delivery_request.buyer_id) and (@delivery.status != 'canceled')
           @contents = DeliveryContent.where(id_delivery: @delivery.id)
@@ -72,14 +89,100 @@ class DeliveriesController < BaseController
             format.json { render json: { notice: 'EMPTY_CART' }, status: :unprocessable_entity }
             format.html { render :new }
           else
-            Delivery.update(@delivery.id, :status => 'completed')
 
-            @delivery = Delivery.find(@delivery.id)
-            meta = @delivery.to_meta(true)
+            @deliveryman_wallet = @delivery.availability.deliveryman.wallet
+            @buyer_wallet = @delivery.delivery_request.buyer.wallet
+            @delivery_total = @delivery.total + @delivery.commission
+            @walletValue = 0
 
-            Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'sms', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
-            format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
-            format.json { head :no_content }
+            if @deliveryman_wallet.lemonway_id.present?
+
+              wallet = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+                http_proxyaddr: proxy.host,
+                http_proxyport: proxy.port,
+                http_proxyuser: proxy.user,
+                http_proxypass: proxy.password,
+                headers: {
+                  'Content-Type' => 'application/json; charset=utf-8',
+                },
+                body: {
+                  wlLogin: ENV['LEMONWAY_LOGIN'],
+                  wlPass: ENV['LEMONWAY_PASS'],
+                  language: 'fr',
+                  version: '1.8',
+                  walletIp: request.remote_ip,
+                  walletUa: 'ruby/rails',
+                  wallet: @buyer_wallet.lemonway_id,
+                  email: @delivery.delivery_request.buyer.email
+                }.to_json
+              );
+
+              if wallet.code == 200
+                @walletValue = wallet['d']['WALLET']['BAL'].to_f
+              end
+
+              response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
+                http_proxyaddr: proxy.host,
+                http_proxyport: proxy.port,
+                http_proxyuser: proxy.user,
+                http_proxypass: proxy.password,
+                headers: {
+                  'Content-Type' => 'application/json; charset=utf-8',
+                },
+                body: {
+                  wlLogin: ENV['LEMONWAY_LOGIN'],
+                  wlPass: ENV['LEMONWAY_PASS'],
+                  language: 'fr',
+                  version: '1.8',
+                  walletIp: request.remote_ip,
+                  walletUa: 'ruby/rails',
+                  wallet: @buyer_wallet.lemonway_id,
+                  cardId: @buyer_wallet.lemonway_card_id,
+                  amountTot: '%.2f' % (@walletValue > @delivery_total ? @delivery.commission - @delivery.shipping_total : @delivery_total - @walletValue),
+                  amountCom: '%.2f' % (@delivery.commission - @delivery.shipping_total),
+                  comment: @delivery.status,
+                  message: @delivery.status,
+                  autoCommission: '0',
+                  isPreAuth: '1',
+                  specialConfig: '',
+                  delayedDays: '',
+                  wkToken: @delivery.id
+                }.to_json
+              );
+
+              if response.code == 200
+
+                if response['d']['TRANS'].present?
+
+                  Delivery.update(@delivery.id, payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'completed')
+                  meta = @delivery.to_meta(true)
+                  Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'sms', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
+                  format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
+                  format.json { head :no_content }
+
+                elsif response['d']['E'].present?
+
+                  ap "LEMONWAY ERROR"
+                  ap response['d']['E']
+                  format.html { render :edit }
+                  format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+
+                end
+
+              else
+
+                format.html { render :edit }
+                format.json { render json: { notice: 'LEMONWAY_SERVER_ERROR' }, status: :unprocessable_entity }
+
+              end
+
+            else
+
+              format.html { render :edit }
+              format.json { render json: { notice: 'WALLET_ERROR' }, status: :unprocessable_entity }
+
+            end
+
           end
 
       else
@@ -89,8 +192,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/cancel
-  # POST /deliveries/1/cancel.json
+  # Annulation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/cancel
+  # @note POST /deliveries/1/cancel.json
   def cancel
     respond_to do |format|
       if !@delivery.nil? && current_user.id == @delivery.delivery_request.buyer_id
@@ -111,8 +216,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # POST /deliveries/1/finalize
-  # POST /deliveries/1/finalize.json
+  # Finalisation de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note POST /deliveries/1/finalize
+  # @note POST /deliveries/1/finalize.json
   def finalize
 
     proxy = URI(ENV['FIXIE_URL'])
@@ -122,11 +229,13 @@ class DeliveriesController < BaseController
       # Le livreur entre le code et note l'acheteur
       if Delivery.exists?(id: params[:id], validation_code: params[:validation_code], status: 'completed') && current_user.id == @delivery.availability.deliveryman_id
 
-        @wallet = @delivery.delivery_request.buyer.wallet
+        @deliveryman_wallet = @delivery.availability.deliveryman.wallet
+        @buyer_wallet = @delivery.delivery_request.buyer.wallet
+        @delivery_total = @delivery.total + @delivery.commission
 
-        if !@wallet.lemonway_id.nil? && !@wallet.lemonway_card_id.nil?
+        if @deliveryman_wallet.lemonway_id.present?
 
-          response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInWithCardId',
+          response = HTTParty.post(ENV['LEMONWAY_URL'] + '/MoneyInValidate',
             http_proxyaddr: proxy.host,
             http_proxyport: proxy.port,
             http_proxyuser: proxy.user,
@@ -141,45 +250,78 @@ class DeliveriesController < BaseController
               version: '1.8',
               walletIp: request.remote_ip,
               walletUa: 'ruby/rails',
-              wallet: @wallet.lemonway_id,
-              cardId: @wallet.lemonway_card_id,
-              amountTot: '%.2f' % (@delivery.total + @delivery.shipping_total),
-              amountCom: '%.2f' % @delivery.commission,
-              comment: @delivery.status,
-              message: @delivery.status,
-              autoCommission: '0',
-              isPreAuth: '',
-              specialConfig: '',
-              delayedDays: '',
-              wkToken: @delivery.id
+              transactionId: @delivery.payin_id,
+              cardId: @buyer_wallet.lemonway_card_id,
+              amountTot: '',
+              amountCom: '',
+              specialConfig: ''
             }.to_json
           );
 
           if response.code == 200
 
-            if !response['d']['TRANS']['HPAY'].nil?
-              Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
-              Delivery.update(params[:id], payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'done')
-              @delivery.availability.update(enabled: false)
-              format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
-              format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
-            elsif !response['d']['E'].nil?
+            if response['d']['MONEYINVALIDATE'].present?
+
+              payment = HTTParty.post(ENV['LEMONWAY_URL'] + '/SendPayment',
+                http_proxyaddr: proxy.host,
+                http_proxyport: proxy.port,
+                http_proxyuser: proxy.user,
+                http_proxypass: proxy.password,
+                headers: {
+                  'Content-Type' => 'application/json; charset=utf-8',
+                },
+                body: {
+                  wlLogin: ENV['LEMONWAY_LOGIN'],
+                  wlPass: ENV['LEMONWAY_PASS'],
+                  language: 'fr',
+                  version: '1.8',
+                  walletIp: request.remote_ip,
+                  walletUa: 'ruby/rails',
+                  debitWallet: @buyer_wallet.lemonway_id,
+                  creditWallet: @deliveryman_wallet.lemonway_id,
+                  amount: '%.2f' % (@delivery.total + @delivery.shipping_total),
+                  message: @delivery.id,
+                  scheduledDate: '',
+                  privateData: ''
+                }.to_json
+              );
+
+              if payment['d']['TRANS_SENDPAYMENT'].present?
+
+                Rating.create!(to_user_id: @delivery.delivery_request.buyer_id, from_user_id: @delivery.availability.deliveryman_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
+                Delivery.update(@delivery.id, payin_id: response['d']['MONEYINVALIDATE']['HPAY']['ID'], status: 'done')
+                @delivery.availability.update(enabled: false)
+                format.html { redirect_to @delivery, notice: 'Delivery was successfully set to finished.' }
+                format.json { render json: { notice: 'ORDER_DONE' }, status: :ok }
+
+              elsif payment['d']['E'].present?
+
+                ap "LEMONWAY ERROR"
+                ap payment['d']['E']
+                format.html { render :edit }
+                format.json { render json: { notice: payment['d']['E']['Msg'] }, status: :unprocessable_entity }
+
+              end
+
+            elsif response['d']['E'].present?
+
               ap "LEMONWAY ERROR"
               ap response['d']['E']
               format.html { render :edit }
               format.json { render json: { notice: response['d']['E']['Msg'] }, status: :unprocessable_entity }
+
             end
 
           else
 
-            format.html { render :new }
+            format.html { render :edit }
             format.json { render json: { notice: 'LEMONWAY_SERVER_ERROR' }, status: :unprocessable_entity }
 
           end
 
         else
 
-          format.html { render :new }
+          format.html { render :edit }
           format.json { render json: { notice: 'WALLET_ERROR' }, status: :unprocessable_entity }
 
         end
@@ -189,22 +331,25 @@ class DeliveriesController < BaseController
 
         Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
         @delivery.update(rated: true)
-        format.html { render :new }
+        format.html { render :edit }
         format.json { render json: { notice: 'RATING_DONE' }, status: :ok }
 
       # Mauvais code de validation
       else
 
-        format.html { render :new }
+        format.html { render :edit }
         format.json { render json: { notice: 'VALIDATION_CODE_ERROR' }, status: :unprocessable_entity }
 
       end
 
     end
+
   end
 
-  # PATCH/PUT /deliveries/1
-  # PATCH/PUT /deliveries/1.json
+  # Mise à jour de la livraison/commande correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /deliveries/1
+  # @note PATCH/PUT /deliveries/1.json
   def update
 
     delivery_contents = params[:delivery_contents]
@@ -224,7 +369,7 @@ class DeliveriesController < BaseController
       total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
     end
 
-    #Delivery.update(@delivery.id, :total => total)
+    # Delivery.update(@delivery.id, :total => total)
 
     respond_to do |format|
       if @delivery.update(total: total)
@@ -237,8 +382,10 @@ class DeliveriesController < BaseController
     end
   end
 
-  # DELETE /deliveries/1
-  # DELETE /deliveries/1.json
+  # Suppression de l'adresse correspondant au paramètre 1.
+  #
+  # @note DELETE /deliveries/1
+  # @note DELETE /deliveries/1.json
   def destroy
     @delivery.destroy
     respond_to do |format|

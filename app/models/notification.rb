@@ -6,6 +6,11 @@ class Notification < ActiveRecord::Base
 
 	private
 
+	# Envoie un sms après la création de la notification si elle est de type sms.
+	#
+	# @!method send_notification
+	# @!scope class
+	# @!visibility public
 	def send_notification
 
 	    if self.sender == 'email'

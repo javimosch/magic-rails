@@ -1,28 +1,39 @@
 class NotificationsController < BaseController
   before_action :set_notification, only: [:show, :edit, :update, :destroy]
 
-  # GET /notifications
-  # GET /notifications.json
+  # Retourne la liste de toutes les notifications correspondantes à l'utilisateur actuel.
+  #
+  # @note GET /notifications
+  # @note GET /notifications.json
   def index
     @notifications = Notification.where(user_id: current_user.id, read: false, sender: ['push', 'sms'])
   end
 
-  # GET /notifications/1
-  # GET /notifications/1.json
+  # Retourne la notification correspondant au paramètre 1.
+  #
+  # @note GET /notifications/1
+  # @note GET /notifications/1.json
   def show
   end
 
-  # GET /notifications/new
+  # Affiche le formulaire de création d'une nouvelle notification.
+  #
+  # @note GET /notifications/new
   def new
     @notification = Notification.new
   end
 
-  # GET /notifications/1/edit
+
+  # Affiche le formulaire d'édition de la notification correspondant au paramètre 1.
+  #
+  # @note GET /notifications/1/edit
   def edit
   end
 
-  # POST /notifications
-  # POST /notifications.json
+  # Créée une nouvelle notification.
+  #
+  # @note POST /notifications
+  # @note POST /notifications.json
   def create
     @notification = Notification.new(notification_params)
 
@@ -37,8 +48,10 @@ class NotificationsController < BaseController
     end
   end
 
-  # PATCH/PUT /notifications/1
-  # PATCH/PUT /notifications/1.json
+  # Mise à jour de la notification correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /notifications/1
+  # @note PATCH/PUT /notifications/1.json
   def update
     respond_to do |format|
       if @notification.update(notification_params)
@@ -51,8 +64,10 @@ class NotificationsController < BaseController
     end
   end
 
-  # DELETE /notifications/1
-  # DELETE /notifications/1.json
+  # Suppression de la notification correspondant au paramètre 1.
+  #
+  # @note DELETE /notifications/1
+  # @note DELETE /notifications/1.json
   def destroy
     @notification.destroy
     respond_to do |format|

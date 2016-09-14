@@ -2,28 +2,72 @@ class WalletsController < BaseController
   before_action :set_wallet, only: [:edit, :destroy]
   before_action :set_user_wallet, only: [:show, :update]
 
-  # GET /wallets
-  # GET /wallets.json
+  # Retourne la liste de tous les portefeuilles.
+  #
+  # @note GET /wallets
+  # @note GET /wallets.json
   def index
     @wallets = Wallet.all
   end
 
-  # GET /wallets/1
-  # GET /wallets/1.json
+  # Retourne la valeur du portefeuille de l'utilisateur actuel.
+  #
+  # @note GET /wallets/value
+  # @note GET /wallets/value.json
+  def value
+
+    proxy = URI(ENV['FIXIE_URL'])
+
+    response = HTTParty.post(ENV['LEMONWAY_URL'] + '/GetWalletDetails',
+      http_proxyaddr: proxy.host,
+      http_proxyport: proxy.port,
+      http_proxyuser: proxy.user,
+      http_proxypass: proxy.password,
+      headers: {
+        'Content-Type' => 'application/json; charset=utf-8',
+      },
+      body: {
+        wlLogin: ENV['LEMONWAY_LOGIN'],
+        wlPass: ENV['LEMONWAY_PASS'],
+        language: 'fr',
+        version: '1.8',
+        walletIp: request.remote_ip,
+        walletUa: 'ruby/rails',
+        wallet: current_user.wallet.lemonway_id,
+        email: current_user.email
+      }.to_json
+    );
+
+    if response.code == 200
+      @value = response['d']['WALLET']['BAL']
+    end
+
+  end
+
+  # Retourne le portefeuille correspondant au paramètre 1.
+  #
+  # @note GET /wallets/1
+  # @note GET /wallets/1.json
   def show
   end
 
-  # GET /wallets/new
+  # Affiche le formulaire de création d'un nouveau portefeuille.
+  #
+  # @note GET /wallets/new
   def new
     @wallet = Wallet.new
   end
 
-  # GET /wallets/1/edit
+  # Affiche le formulaire d'édition du portefeuille correspondant au paramètre 1.
+  #
+  # @note GET /wallets/1/edit
   def edit
   end
 
-  # PATCH/PUT /wallets/1
-  # PATCH/PUT /wallets/1.json
+  # Mise à jour du portefeuille correspondant au paramètre 1.
+  #
+  # @note PATCH/PUT /wallets/1
+  # @note PATCH/PUT /wallets/1.json
   def update
 
     proxy = URI(ENV['FIXIE_URL'])
@@ -74,8 +118,10 @@ class WalletsController < BaseController
 
   end
 
-  # DELETE /wallets/1
-  # DELETE /wallets/1.json
+  # Suppression du portefeuille correspondant au paramètre 1.
+  #
+  # @note DELETE /wallets/1
+  # @note DELETE /wallets/1.json
   def destroy
     @wallet.destroy
     respond_to do |format|
@@ -90,6 +136,7 @@ class WalletsController < BaseController
       @wallet = Wallet.find(params[:id])
     end
 
+    # Use callbacks to share common setup or constraints between actions.
     def set_user_wallet
       @wallet = User.find(params[:id]).wallet
     end

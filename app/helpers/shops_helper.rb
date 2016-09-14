@@ -1,5 +1,9 @@
 module ShopsHelper
 
+  # Retourne le nom de la chaine correspondant au paramètre id.
+  #
+  # @!method chain_name(id)
+  # @param id [Integer] L'identifiant de la chaine de magasin
   def chain_name(id)
     chains = {}
     chains['3'] = 'Ooshop'
@@ -25,6 +29,10 @@ module ShopsHelper
     end
   end
 
+  # Retourne le magasin correspondant au paramètre id.
+  #
+  # @!method get_shop(id)
+  # @param id [Integer] L'identifiant du magasin
   def get_shop(id)
     shop_url = "https://www.mastercourses.com/api2/stores/#{id}"
     shop = Rails.cache.fetch(shop_url, expires_in: 1.days) do
