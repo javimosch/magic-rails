@@ -13,6 +13,28 @@ ActiveAdmin.register Delivery do
 		end
 		f.actions
 	end
+	
+	show do
+		attributes_table do
+	      row :id
+	      row :status
+	      row :validation_code
+	      row :total
+	      row :commission
+	      row :payin_id
+	      row :availability_id
+	      row :delivery_request_id
+	      row :created_at
+	      row :updated_at
+	      row :shipping_total
+	      row :rated
+	      row :related_products do |delivery|
+	          items = DeliveryContent.where({id_delivery:delivery.id})
+	          raw(items.to_json)
+	      end
+	    end
+	    active_admin_comments
+	end
 
 	action_item only: [:edit] do
 		link_to "Set cancelled", set_cancelled_admin_delivery_path
