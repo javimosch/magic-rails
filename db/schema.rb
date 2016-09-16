@@ -112,8 +112,9 @@ ActiveRecord::Schema.define(version: 20160909152855) do
     t.integer  "id_product"
     t.integer  "quantity"
     t.float    "unit_price"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+    t.integer  "delivery_request_id"
   end
 
   create_table "delivery_requests", force: :cascade do |t|
@@ -121,11 +122,10 @@ ActiveRecord::Schema.define(version: 20160909152855) do
     t.integer  "schedule_id"
     t.integer  "shop_id"
     t.integer  "address_id"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
-    t.boolean  "match",               default: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.boolean  "match",       default: false
     t.integer  "delivery_id"
-    t.integer  "delivery_request_id"
   end
 
   create_table "notifications", force: :cascade do |t|

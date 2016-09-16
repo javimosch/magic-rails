@@ -2,6 +2,8 @@ class DeliveryRequest < ActiveRecord::Base
 
 	belongs_to :buyer, class_name: 'User'
 	belongs_to :delivery
+	
+	has_many :delivery_contents, foreign_key: 'delivery_request_id'
 
 	has_one :address, foreign_key: 'id', primary_key: 'address_id'
 	has_one :delivery, dependent: :destroy
