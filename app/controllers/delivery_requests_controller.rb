@@ -69,6 +69,42 @@ class DeliveryRequestsController < BaseController
     end
 
   end
+  
+  # Save products from a cart and associate them with DeliveryRequest when there is not a Delivery registry.
+  #
+  # @note POST /delivery_requests/saveProducts/1.json
+  def saveProducts
+    
+    delivery_request_id = params.require(:delivery_request).permit(:id)[:id]
+    delivery_contents = params.require(:delivery_request).require(:delivery_contents)
+
+    if delivery_contents.nil? then
+      return render json:{notice: 'EMPTY_CART'}, status:500
+    end
+    
+    logger.debug "delivery_request_id #{delivery_request_id}"
+    logger.debug "delivery_contents #{delivery_contents}"
+    
+    DeliveryContent.destroy_all(delivery_request: delivery_request_id)
+    delivery_contents.each do |delivery_content|
+      DeliveryContent.create! id_delivery: nil, delivery_request_id: delivery_request_id, id_product: delivery_content[:id_product], quantity: delivery_content[:quantity], unit_price: delivery_content[:unit_price]
+    end
+    
+    respond_to do |format|
+      format.json { render json:{notice: 'Saved'}, status:200 }
+    end
+  end
+  
+  # Fetch products from DeliveryRequest
+  #
+  # @note POST /delivery_request/fetchProducts/1.json
+  def fetchProducts
+    @delivery_request = DeliveryRequest.find(params[:id])
+    @delivery_contents = DeliveryContent.where(delivery_request_id: params[:id])
+    #respond_to do |format|
+    #  format.json { render json:{notice: 'some',delivery_contents: @delivery_contents}, status:200 }
+    #end
+  end
 
   # Annulation de la demande de livraison correspondant au paramètre 1.
   #
@@ -143,6 +179,6 @@ class DeliveryRequestsController < BaseController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def delivery_request_params
-      params.require(:delivery_request).permit(:buyer_id, :schedule, :shop_id)
+      params.require(:delivery_request).permit(:buyer_id, :schedule, :shop_id,:delivery_contents)
     end
 end
