@@ -99,8 +99,28 @@ class DeliveryRequestsController < BaseController
   #
   # @note POST /delivery_request/fetchProducts/1.json
   def fetchProducts
+    
     @delivery_request = DeliveryRequest.find(params[:id])
-    @delivery_contents = DeliveryContent.where(delivery_request_id: params[:id])
+    @delivery_contents = nil
+    
+    # grab producs from request or delivery
+    delivery = Delivery.where({delivery_request_id: params[:id]})
+    if !delivery.nil? then
+      delivery = delivery.first()
+      @delivery_contents = DeliveryContent.where(id_delivery: delivery.id)
+    else
+      @delivery_contents = DeliveryContent.where(delivery_request_id: params[:id])
+    end
+      
+    #delivery_contents_from_delivery = DeliveryContent.where({id_delivery: delivery.id})
+    #.where('id NOT IN (?)', @delivery_contents.pluck(:id))
+    #if !delivery_contents_from_delivery.nil? then
+    #  @delivery_contents.concat delivery_contents_from_delivery
+    #end
+    
+    
+    logger.debug "RESULT RESULT  #{@delivery_contents.inspect}"
+    
     #respond_to do |format|
     #  format.json { render json:{notice: 'some',delivery_contents: @delivery_contents}, status:200 }
     #end
