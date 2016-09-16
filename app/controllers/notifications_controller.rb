@@ -1,3 +1,5 @@
+require 'json'
+
 class NotificationsController < BaseController
   before_action :set_notification, only: [:show, :edit, :update, :destroy]
 
@@ -7,6 +9,17 @@ class NotificationsController < BaseController
   # @note GET /notifications.json
   def index
     @notifications = Notification.where(user_id: current_user.id, read: false, sender: ['push', 'sms'])
+    
+    
+    #TESTING: return notifications with read:true of type delivery_request when the delivery_request has not related delivery.
+    #@notifications_delivery_request_without_delivery = Notification.where(user_id: current_user.id, read: true, mode: "delivery_request", sender: ['push', 'sms']).select {|notification|
+    #  meta = JSON.parse(notification.meta)
+    #  delivery_request_id = meta['delivery_request']['id']
+      #logger.debug "META #{meta['delivery_request']['id']}"
+    #  !Delivery.any? {|delivery| delivery.delivery_request_id = delivery_request_id}
+    #}
+    #@notifications.concat @notifications_delivery_request_without_delivery
+    
   end
 
   # Retourne la notification correspondant au paramètre 1.
