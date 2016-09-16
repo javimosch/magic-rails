@@ -27,10 +27,10 @@ official:
   only:
   - master
 
-#dev:
-#  type: deploy
-#  script:
-#  - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
-#  only:
-#  - staging
+dev:
+  type: deploy
+  script:
+  - dpl --provider=heroku --app=smc-dev-server --api-key=$HEROKU_API_KEY
+  only:
+  - staging
   
