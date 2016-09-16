@@ -21,7 +21,14 @@ json.array!(@deliveries) do |delivery|
 	json.delivery_contents do
 		json.array!(delivery.delivery_contents) do |delivery_content|
 	  	json.extract! delivery_content, :id, :id_delivery, :id_product, :quantity, :unit_price
-			product_url = "https://www.mastercourses.com/api2/stores/#{delivery.availability.shop_id}/products/#{delivery_content.id_product}/"
+	  		
+	  		shop_id = delivery.availability.shop_id
+    
+		    if ENV['USE_SHOP_ID'] then
+		      shop_id = ENV['USE_SHOP_ID']
+		    end
+		    
+			product_url = "https://www.mastercourses.com/api2/stores/#{shop_id}/products/#{delivery_content.id_product}/"
 			product = Rails.cache.fetch(product_url, expires_in: 1.days) do
 				HTTParty.get(product_url, query: {
 					mct: ENV['MASTERCOURSE_KEY']
