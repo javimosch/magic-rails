@@ -8,21 +8,31 @@ class ShopsController < BaseController
   def index
 
     @response = []
-
-    if params[:address].present? && !params[:address].blank?
-      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
-        mct: ENV['MASTERCOURSE_KEY'],
-        address: params[:address],
-        number: ENV['SHOPS_NUMBER']
-      });
+    
+    if ENV['MASTERCOURSE_KEY'].nil? then
+      logger.debug "WARNING: MASTERCOURSE_KEY Enviromental variable required."
     else
-      response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
-        mct: ENV['MASTERCOURSE_KEY'],
-        lat: params[:lat],
-        lon: params[:lon],
-        number: ENV['SHOPS_NUMBER']
-      });
+
+      if params[:address].present? && !params[:address].blank?
+        response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+          mct: ENV['MASTERCOURSE_KEY'],
+          address: params[:address],
+          number: ENV['SHOPS_NUMBER']
+        });
+      else
+        response = HTTParty.get('https://www.mastercourses.com/api2/stores/locator', query: {
+          mct: ENV['MASTERCOURSE_KEY'],
+          lat: params[:lat],
+          lon: params[:lon],
+          number: ENV['SHOPS_NUMBER']
+        });
+      end
+      
+      logger.debug "MASTERCOURSE RESPONSE #{response}"
+    
     end
+    
+    
 
     if response.code == 200
 
@@ -78,12 +88,27 @@ class ShopsController < BaseController
   def products
 
     @response = []
-
-    url = "https://www.mastercourses.com/api2/stores/#{params['shop_id']}/products/"
+    
+    shop_id = params['shop_id']
+    
+    if ENV['USE_SHOP_ID'] then
+      shop_id = ENV['USE_SHOP_ID']
+    end
+    
+    url = "https://www.mastercourses.com/api2/stores/#{shop_id}/products/"
+    
+    if !Rails.cache.read(url).nil? then 
+      if Rails.cache.read(url).is_a? String then
+        logger.debug "Bad Cache removed for #{params['shop_id']}"
+        Rails.cache.delete(url)
+      end 
+    end
+    
     all_products = Rails.cache.fetch(url, expires_in: 1.days) do
+      logger.debug "HTTP GET #{url}"
       HTTParty.get(url, query: {
-        mct: ENV['MASTERCOURSE_KEY']
-      }).parsed_response
+          mct: ENV['MASTERCOURSE_KEY']
+      }, timeout: 120).parsed_response
     end
 
     valid_products = all_products.find_all { |product| product['available'] and product['price'] and includes_strings?(params['q'], product['label']) }
