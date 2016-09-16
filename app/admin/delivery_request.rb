@@ -25,6 +25,10 @@ ActiveAdmin.register DeliveryRequest do
       row :updated_at
       row :match
       row :delivery
+      row :related_products do |delivery_request|
+          items = DeliveryContent.where({delivery_request_id:delivery_request.id})
+          raw(items.to_json)
+      end
     end
     active_admin_comments
   end
