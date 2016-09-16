@@ -8,10 +8,16 @@ class Delivery < ActiveRecord::Base
 	after_create :generate_validation_code
 	after_create :send_accepted_delivery
 	after_create :create_delayed_jobs
+	
+	before_save :link_existing_products
+	#before_update :link_existing_products
+	#after_find :link_existing_products #this may hit performance ?
+	
 	before_create :check_duplicate
 
 	before_update :calculate_commission
 	before_update :calculate_shipping_total
+	
 
 	# Récupère l'évaluation de l'utilisateur sur une commande.
 	#
@@ -124,6 +130,28 @@ class Delivery < ActiveRecord::Base
 
 	end
 
+	# Link Products who are currently linked to DeliveryRequest
+	#
+	# @!method link_existing_products
+	# @!scope class
+	# @!visibility public
+	def link_existing_products
+		
+		logger.debug "link_existing_products START"
+		products = DeliveryContent.where({delivery_request_id: self.delivery_request.id, id_delivery: nil})
+		if products.count > 0 then
+			logger.debug "link_existing_products COUNT PRODUCTS TO LINK #{products.count}"
+			products.each {|product|
+				product.id_delivery = self.id
+				logger.debug "PRODUCT LINK TO DELIVERY OK? #{product.save}"
+			}
+		end
+		logger.debug "link_existing_products END"
+		
+		#disable this if before_update!!!!!
+		#self.save #maybe saving refresh the delivery being returned and delivery_contents contains the products that were just liked?
+		
+	end
 
 	# Calcule la commission de la commande.
 	#
