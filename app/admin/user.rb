@@ -27,6 +27,9 @@ ActiveAdmin.register User do
 			row 'Total deliveries' do |user|
 				user.count_deliveries
 			end
+			row :avatar do |user|
+				raw(user.avatar.to_s)
+			end
 			row :created_at
 			row :updated_at
 			row :sign_in_count
