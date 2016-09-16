@@ -19,10 +19,18 @@ before_script:
 #   only:
 #   - /^release\/.*$/
 
-# Les commits de master sont deployés sur la plateforme de production
-staging:
+# Les commits de master and staging sont deployés sur la plateforme de production dev
+official:
   type: deploy
   script:
   - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
   only:
   - master
+
+#dev:
+#  type: deploy
+#  script:
+#  - dpl --provider=heroku --app=shopmycourses --api-key=$HEROKU_API_KEY
+#  only:
+#  - staging
+  
