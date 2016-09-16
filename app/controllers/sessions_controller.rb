@@ -55,7 +55,7 @@ class SessionsController < BaseController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.permit(:email, :password, :auth_token, :auth_method, :id_token)
+    params.require(:session).permit(:email, :password, :auth_token, :auth_method, :id_token)
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
