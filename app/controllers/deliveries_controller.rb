@@ -92,6 +92,13 @@ class DeliveriesController < BaseController
 
             @deliveryman_wallet = @delivery.availability.deliveryman.wallet
             @buyer_wallet = @delivery.delivery_request.buyer.wallet
+            
+            
+            @delivery.calculate_total
+            @delivery.calculate_commission
+            @delivery.calculate_shipping_total
+            
+            
             @delivery_total = @delivery.total + @delivery.commission
             @walletValue = 0
 
@@ -154,7 +161,13 @@ class DeliveriesController < BaseController
 
                 if response['d']['TRANS'].present?
 
-                  Delivery.update(@delivery.id, payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'completed')
+                  
+                  #Delivery.update(@delivery.id, payin_id: response['d']['TRANS']['HPAY']['ID'], status: 'completed')
+                  
+                  @delivery.payin_id = response['d']['TRANS']['HPAY']['ID']
+                  @delivery.status = 'completed'
+                  @delivery.save
+                  
                   meta = @delivery.to_meta(true)
                   Notification.create! mode: 'cart_filled', title: 'Votre client a finalisé son panier', content: 'Votre client a finalisé son panier', sender: 'sms', user_id: @delivery.availability.deliveryman_id, meta: meta.to_json, read: false
                   format.html { redirect_to @delivery, notice: 'Delivery was successfully confirmed.' }
@@ -305,6 +318,9 @@ class DeliveriesController < BaseController
 
             elsif response['d']['E'].present?
 
+
+              logger.error "LEMONWAY ERROR #{response['d']['E'].inspect}"
+
               ap "LEMONWAY ERROR"
               ap response['d']['E']
               format.html { render :edit }
@@ -329,8 +345,18 @@ class DeliveriesController < BaseController
       # Le livré note le livreur
       elsif params[:rating].present? && current_user.id == @delivery.delivery_request.buyer_id
 
-        Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
-        @delivery.update(rated: true)
+        
+        
+        
+        
+        if !@delivery.rated? then
+          Rating.create!(to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i, delivery_id: @delivery.id)
+          @delivery.update(rated: true)
+        else
+          logger.warn "ALREADY RATED? #{{to_user_id: @delivery.availability.deliveryman_id, from_user_id: @delivery.delivery_request.buyer_id, rating: params[:rating].to_i, delivery_id: @delivery.id}}"
+        end
+        
+        
         format.html { render :edit }
         format.json { render json: { notice: 'RATING_DONE' }, status: :ok }
 
