@@ -153,52 +153,8 @@ class Delivery < ActiveRecord::Base
 		
 	end
 
-	# Calcule la commission de la commande.
-	#
-	# @!method calculate_commission
-	# @!scope class
-	# @!visibility public
-	def calculate_commission
 
-		if !total.nil?
 
-			if total <= 35
-				self.commission = 3.60
-			elsif total > 35
-				@commission = Commission.last
-				if @commission.present?
-					self.commission = self.total * @commission.percentage
-				else
-					self.commission = self.total * ENV['COMMISSION_PERCENTAGE'].to_f
-				end
-			end
-
-		end
-
-	end
-
-	# Calcule les frais de livraison de la commande.
-	#
-	# @!method calculate_shipping_total
-	# @!scope class
-	# @!visibility public
-	def calculate_shipping_total
-
-		if !total.nil?
-
-			if total <= 35
-				self.shipping_total = 3
-			elsif total > 35
-				@commission = Commission.last
-				if @commission.present?
-					self.shipping_total = self.total * @commission.shipping_percentage
-				else
-					self.shipping_total = self.total * ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
-				end
-			end
-
-		end
-
-	end
+	
 
 end

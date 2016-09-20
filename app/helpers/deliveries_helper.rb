@@ -1,7 +1,79 @@
 module DeliveriesHelper
 	extend ActiveSupport::Concern
+	
+	
+	public
+	# Calcule les frais de livraison de la commande.
+	#
+	# @!method calculate_shipping_total
+	# @!scope class
+	# @!visibility public
+	def calculate_shipping_total
+
+		if !total.nil?
+
+			if total <= 35
+				self.shipping_total = 3
+			elsif total > 35
+				@commission = Commission.last
+				if @commission.present?
+					self.shipping_total = self.total * @commission.shipping_percentage
+				else
+					self.shipping_total = self.total * ENV['SHIPPING_TOTAL_PERCENTAGE'].to_f
+				end
+			end
+
+		end
+
+	end
+	# Calcule la commission de la commande.
+	#
+	# @!method calculate_commission
+	# @!scope class
+	# @!visibility public
+	def calculate_commission
+		if !self.total.nil?
+			self.commission = Delivery.get_commission(self.total)
+		end
+	end
+	# Calculates the order total using the related delivery_contents
+	#
+	# @!method calculate_total
+	# @!scope class
+	# @!visibility public
+	def calculate_total
+		_total = 0
+	    self.delivery_contents.each do |delivery_content|
+	      _total += delivery_content[:quantity].to_f * delivery_content[:unit_price].to_f
+	    end
+	    self.total = _total
+	end
+
 
 	module ClassMethods
+		
+		def get_commission(total)
+			commission = 0
+			if !total.nil?
+				if total <= 35
+					commission = 3.60
+				elsif total > 35
+					lastCommission = Commission.last
+					commission = 0
+					percentage = 0
+					if lastCommission.present?
+						percentage =  lastCommission.percentage
+					else
+						percentage = ENV['COMMISSION_PERCENTAGE'].to_f
+					end
+					commission = total * percentage
+				end
+				logger.info "get_commission  total:#{total} percentage:#{percentage} commission:#{commission}"
+			else
+				logger.warn "get_commission total nil"
+			end
+			commission
+		end
 
 		# Assigne la variable @delivery avec la commande correspondant au paramètre delivery_id.
 		#
