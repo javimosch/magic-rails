@@ -105,7 +105,7 @@ class DeliveryRequestsController < BaseController
     
     # grab producs from request or delivery
     delivery = Delivery.where({delivery_request_id: params[:id]})
-    if !delivery.nil? then
+    if !delivery.nil? and delivery.count>0 then
       delivery = delivery.first()
       @delivery_contents = DeliveryContent.where(id_delivery: delivery.id)
     else
