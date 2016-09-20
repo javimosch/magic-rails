@@ -95,6 +95,15 @@ class DeliveryRequestsController < BaseController
     end
   end
   
+  # Calculate commission
+  #
+  # @note POST /delivery_request/calculateCommission/1.json
+  def calculate_commission
+    total = params[:total]
+		commission = Delivery.get_commission(total)
+		render json: {commission: commission}, status: 200
+	end
+  
   # Fetch products from DeliveryRequest
   #
   # @note POST /delivery_request/fetchProducts/1.json

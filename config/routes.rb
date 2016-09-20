@@ -28,6 +28,7 @@ Rails.application.routes.draw do
   post '/delivery_requests/:id/cancel' => 'delivery_requests#cancel', :defaults => { :format => :json }
   post '/delivery_requests/saveProducts/:id' => 'delivery_requests#saveProducts', :defaults => { :format => :json }
   post '/delivery_requests/fetchProducts/:id' => 'delivery_requests#fetchProducts', :defaults => { :format => :json }
+  post '/delivery_requests/calculateCommission' => 'delivery_requests#calculate_commission', :defaults => { :format => :json }
   
   get 'products' => 'shops#products', :defaults => { :format => :json }
   get '/wallets/:id/value' => 'wallets#value', :defaults => { :format => :json }
