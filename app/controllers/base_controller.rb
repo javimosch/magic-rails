@@ -42,13 +42,16 @@ class BaseController < ActionController::Base
       if response.code != 200
         return { code: response.code, message: 'Error authenticating : wrong idToken' }
       else
+        
+        logger.debug "GOOGLE RESPONSE #{response}"
+        
         # Still need to verify the token is for our app
         logger.debug "GOOGLE AUD [CREATE WHITELIST HERE] #{response['aud']}"
         if false # response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
           return { code: 401, message: 'Error authenticating : idToken is not for Shopmycourses' }
         else
           return { code: 200, email: response['email'], given_name: response['given_name'], family_name: response['family_name'], picture: response['picture']}
-        end
+        #end
       end
     else
       return { code: 401, message: 'Error authenticating : missing idToken' }
