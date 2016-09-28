@@ -43,7 +43,8 @@ class BaseController < ActionController::Base
         return { code: response.code, message: 'Error authenticating : wrong idToken' }
       else
         # Still need to verify the token is for our app
-        if response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
+        logger.debug "GOOGLE AUD [CREATE WHITELIST HERE] #{response['aud']}"
+        if false # response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
           return { code: 401, message: 'Error authenticating : idToken is not for Shopmycourses' }
         else
           return { code: 200, email: response['email'], given_name: response['given_name'], family_name: response['family_name'], picture: response['picture']}
@@ -60,6 +61,12 @@ class BaseController < ActionController::Base
   # @param url [String] url de l'avatar
   # @return [Image] Avatar correspondant à l'url
   def get_avatar_from_url(url)
+    logger.debug "get_avatar_from_url url: #{url.inspect}"
+    
+    if url.nil? or url == '' then
+      return ''
+    end
+    
     response = HTTParty.get(url)
     if response.code === 200
       'data:image/jpg;base64,' + Base64.encode64(response.body)
