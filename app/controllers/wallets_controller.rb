@@ -95,6 +95,10 @@ class WalletsController < BaseController
         specialConfig: ''
       }.to_json
     );
+    
+    if ENV['RACK_ENV'] == 'development' then
+      logger.debug "LEMONWAY RESPONSE #{response} " ##{response['d']['E']['Msg']}"
+    end
 
     if response.code == 200
       if !response['d']['CARD'].nil?

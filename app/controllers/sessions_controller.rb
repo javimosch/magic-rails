@@ -31,8 +31,16 @@ class SessionsController < BaseController
       end
 
     elsif user_params[:auth_method] === 'google'
+    
+      if(!user_params[:email].nil?) then
+        #if !User.find_for_database_authentication(email: user_params[:email]).nil?
+      end
+        
+    
 
       response = check_google_token_from_params(params)
+      
+      logger.debug "RESPONSE FROM GOOGLE #{response}"
 
       if response[:code] != 200
         render json: {error_message: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
