@@ -10,24 +10,29 @@ class BaseController < ActionController::Base
   # @param params [Object] Informations sur l'utilisateur
   def create_user_from_params(params)
 
+    logger.debug "SIGNUP (GOOGLE) saving"
     @user = User.new(params)
 
     if @user.save && @user.errors.present? == false
-
+      
+      logger.debug "SIGNUP  success"
       @user.avatar.recreate_versions!
       @user.save!
       @auth_token = jwt_token(@user, params[:password])
 
       @wallet = Wallet.create! user_id: @user.id
       if @wallet.errors.present?
-        render json: {errors: @user.errors.messages}, status: 422
+        logger.debug "SIGNUP  wallet errors"
+        return render json: {errors: @user.errors.messages}, status: 422
       else
         @user.update({wallet_id: @wallet.id})
-        render json: {token: @auth_token, user: @user}, status: 201
+        logger.debug "SIGNUP save success"
+        return render json: {token: @auth_token, user: @user}, status: 201
       end
 
     else
-      render json: {errors: @user.errors.messages}, status: 422
+      logger.debug "SIGNUP  save with errors (activerecord) #{@user.errors.inspect}"
+      return render json: {errors: @user.errors.messages}, status: 422
     end
   end
 
@@ -35,25 +40,27 @@ class BaseController < ActionController::Base
   #
   # @param params [Object] Informations sur l'utilisateur
   def check_google_token_from_params(params)
-
-    if params.has_key?(:id_token)
+    logger.debug "DEBUG: google token check start"
+    if params.has_key?(:id_token) 
       # Checking validity of idToken
       response = HTTParty.get("https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=#{params[:id_token]}")
       if response.code != 200
+        logger.debug "DEBUG: google token check google response is not ok"
         return { code: response.code, message: 'Error authenticating : wrong idToken' }
       else
-        
-        logger.debug "GOOGLE RESPONSE #{response}"
+        logger.debug "DEBUG: google token check google response is ok"
+        #logger.debug "GOOGLE RESPONSE #{response}"
         
         # Still need to verify the token is for our app
-        logger.debug "GOOGLE AUD [CREATE WHITELIST HERE] #{response['aud']}"
-        if false # response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
-          return { code: 401, message: 'Error authenticating : idToken is not for Shopmycourses' }
-        else
+        #logger.debug "GOOGLE AUD [CREATE WHITELIST HERE] #{response['aud']}"
+        #if false # response['aud'] != '979481548722-mj63ev1utfe9v21l5pdiv4j0t1v7jhl2.apps.googleusercontent.com'
+         # return { code: 401, message: 'Error authenticating : idToken is not for Shopmycourses' }
+        #else
           return { code: 200, email: response['email'], given_name: response['given_name'], family_name: response['family_name'], picture: response['picture']}
         #end
       end
     else
+      logger.debug "DEBUG: google token check missing param id_token"
       return { code: 401, message: 'Error authenticating : missing idToken' }
     end
 

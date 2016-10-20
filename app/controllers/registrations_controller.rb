@@ -38,25 +38,29 @@ class RegistrationsController < BaseController
 
 	    elsif user_params[:auth_method] === 'google'
 
-				response = check_google_token_from_params(params)
+			logger.debug "SIGNUP (GOOGLE) initial-check"
+			response = check_google_token_from_params(params)
+			logger.debug "SIGNUP (GOOGLE) initial-check-ends"
 
-	      if response[:code] != 200
-	        render json: {error_message: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
-	        return
+			if response[:code] == 200
+				if (User.find_by(email: response[:email]))
+					logger.debug "SIGNUP (GOOGLE) email-registered #{response[:email]}"
+					render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
 				else
-					if (User.find_by(email: response[:email]))
-						render json: {error_message: "Un compte a déjà été créé avec cet email"}, status: 422
-	        else
-	          password = ('0'..'z').to_a.shuffle.first(8).join
-            params[:password] = password
-            params[:email] = response[:email]
-            params[:firstname] = response[:given_name]
-            params[:lastname] = response[:family_name]
-            params[:avatar] = get_avatar_from_url(response[:picture])
-						params[:auth_token] = params[:id_token]
-						create_user_from_params(user_params)
-	        end
-	      end
+				    logger.debug "SIGNUP (GOOGLE) on-the-way"
+				    password = ('0'..'z').to_a.shuffle.first(8).join
+				    params[:password] = password
+				    params[:email] = response[:email]
+				    params[:firstname] = response[:given_name]
+				    params[:lastname] = response[:family_name]
+				    params[:avatar] = get_avatar_from_url(response[:picture])
+					params[:auth_token] = params[:id_token]
+					return create_user_from_params(user_params)
+				end
+			else
+				logger.debug "SIGNUP (GOOGLE) render error #{response[:code]}"
+				render json: {error_message: 'Une erreur est survenue lors de la connexion avec Google.'}, status: 422
+			end
 
 	    end
 
