@@ -41,6 +41,8 @@ class RegistrationsController < BaseController
 			logger.debug "SIGNUP (GOOGLE) initial-check"
 			response = check_google_token_from_params(params)
 			logger.debug "SIGNUP (GOOGLE) initial-check-ends"
+			
+			#return logger.debug "GOOGLE RESPONSE #{response}"
 
 			if response[:code] == 200
 				if (User.find_by(email: response[:email]))
@@ -51,8 +53,8 @@ class RegistrationsController < BaseController
 				    password = ('0'..'z').to_a.shuffle.first(8).join
 				    params[:password] = password
 				    params[:email] = response[:email]
-				    params[:firstname] = response[:given_name]
-				    params[:lastname] = response[:family_name]
+				    params[:firstname] = response[:given_name] unless response[:given_name].nil?
+				    params[:lastname] = response[:family_name] unless response[:family_name].nil?
 				    params[:avatar] = get_avatar_from_url(response[:picture])
 					params[:auth_token] = params[:id_token]
 					return create_user_from_params(user_params)

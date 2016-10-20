@@ -90,6 +90,9 @@ class Wallet < ActiveRecord::Base
 				if !wallet['d']['WALLET'].nil?
 					self.update(lemonway_id: wallet['d']['WALLET']['ID'])
 				elsif !wallet['d']['E'].nil?
+				
+					logger.debug "WALLET WARNING #{wallet['d']}"
+				
 					raise 'Wallet not found'
 				end
 
